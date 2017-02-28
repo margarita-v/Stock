@@ -1,53 +1,82 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public class MainFrame extends JFrame {
+public class MainFrame extends JFrame implements ActionListener {
 
     private JPanel rootPanel;
+    private JMenuBar menuBar;
+    private JMenu fileMenu, editMenu, openMenu, saveAsMenu;
+    private JMenuItem newItem, txtFileItem, dbItem,
+            saveItem, saveAsTxtItem, saveAsDbItem,
+            closeItem, exitItem,
+            addItem, editItem, deleteItem;
+    private JTable table;
 
     private void createGui() {
 
-        JMenuBar menuBar = new JMenuBar();
+        menuBar = new JMenuBar();
         Font font = new Font("Arial", Font.PLAIN, 12);
 
         // Main items of menu bar
-        JMenu fileMenu = new JMenu("File");
+        fileMenu = new JMenu("File");
         fileMenu.setFont(font);
-        JMenu editMenu = new JMenu("Edit");
+        editMenu = new JMenu("Edit");
+        editMenu.setEnabled(false);
         editMenu.setFont(font);
+
         menuBar.add(fileMenu);
         menuBar.add(editMenu);
 
         // Configure file menu
-        JMenuItem newItem = new JMenuItem("New");
+        newItem = new JMenuItem("New");
         newItem.setFont(font);
+        newItem.addActionListener(this);
 
-        JMenu openMenu = new JMenu("Open");
+        openMenu = new JMenu("Open");
         openMenu.setFont(font);
-        JMenuItem txtFileItem = new JMenuItem("From text file");
+        // Open from text file
+        txtFileItem = new JMenuItem("From text file");
         txtFileItem.setFont(font);
-        JMenuItem dbItem = new JMenuItem("From database");
+        txtFileItem.addActionListener(this);
+        // Open from database
+        dbItem = new JMenuItem("From database");
         dbItem.setFont(font);
+        dbItem.addActionListener(this);
 
         openMenu.add(txtFileItem);
         openMenu.add(dbItem);
 
-        JMenuItem saveItem = new JMenuItem("Save");
+        saveItem = new JMenuItem("Save");
         saveItem.setFont(font);
+        saveItem.setEnabled(false);
+        saveItem.addActionListener(this);
 
-        JMenu saveAsMenu = new JMenu("Save As");
+        saveAsMenu = new JMenu("Save As");
         saveAsMenu.setFont(font);
-        JMenuItem saveAsTxtItem = new JMenuItem("As text file");
+        saveAsMenu.setEnabled(false);
+        // Save as text file
+        saveAsTxtItem = new JMenuItem("As text file");
         saveAsTxtItem.setFont(font);
-        JMenuItem saveAsDbItem = new JMenuItem("As database");
+        saveAsTxtItem.addActionListener(this);
+        // Save as database
+        saveAsDbItem = new JMenuItem("As database");
         saveAsDbItem.setFont(font);
+        saveAsDbItem.addActionListener(this);
 
         saveAsMenu.add(saveAsTxtItem);
         saveAsMenu.add(saveAsDbItem);
 
-        JMenuItem closeItem = new JMenuItem("Close");
-        JMenuItem exitItem = new JMenuItem("Exit");
+        // Close item
+        closeItem = new JMenuItem("Close");
+        closeItem.addActionListener(this);
+        closeItem.setEnabled(false);
         closeItem.setFont(font);
+
+        // Exit item
+        exitItem = new JMenuItem("Exit");
+        exitItem.addActionListener(this);
         exitItem.setFont(font);
 
         fileMenu.add(newItem);
@@ -59,9 +88,14 @@ public class MainFrame extends JFrame {
         fileMenu.add(exitItem);
 
         // Configure edit menu
-        JMenuItem addItem = new JMenuItem("Add");
-        JMenuItem editItem = new JMenuItem("Edit");
-        JMenuItem deleteItem = new JMenuItem("Delete");
+        addItem = new JMenuItem("Add");
+        editItem = new JMenuItem("Edit");
+        deleteItem = new JMenuItem("Delete");
+        // Set action listener
+        addItem.addActionListener(this);
+        editItem.addActionListener(this);
+        deleteItem.addActionListener(this);
+        // Set font
         addItem.setFont(font);
         editItem.setFont(font);
         deleteItem.setFont(font);
@@ -74,7 +108,7 @@ public class MainFrame extends JFrame {
         setContentPane(rootPanel);
         setVisible(true);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new Dimension(400, 300));
+        setPreferredSize(new Dimension(500, 400));
         setJMenuBar(menuBar);
         pack();
     }
@@ -84,6 +118,40 @@ public class MainFrame extends JFrame {
     }
 
     public static void main(String[] args) {
-        new MainFrame();
+        EventQueue.invokeLater(MainFrame::new);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent actionEvent) {
+        switch (actionEvent.getActionCommand()) {
+            case "New":
+                break;
+            // Open
+            case "From text file":
+                break;
+            case "From database":
+                break;
+            case "Save":
+                break;
+            // Save as
+            case "As text file":
+                break;
+            case "As database":
+                break;
+            case "Close":
+                break;
+            // Edit menu
+            case "Add":
+                break;
+            case "Edit":
+                break;
+            case "Delete":
+                break;
+            case "Exit":
+                System.exit(0);
+            default:
+                break;
+        }
     }
 }
+
