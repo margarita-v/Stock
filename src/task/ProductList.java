@@ -9,9 +9,11 @@ import java.util.List;
 
 public class ProductList {
 
-    private ArrayList<Product> products;
+    private List<Product> products;
 
-    public ProductList() { products = new ArrayList<>(); }
+    public ProductList() {
+        products = new ArrayList<>();
+    }
 
     // Add product to the list of products
     public void Add(Product product) {
@@ -19,7 +21,7 @@ public class ProductList {
             // product was found in list
             // then increase product's count
             if (p.equals(product)) {
-                p.setCount(p.getCount() + 1);
+                p.setQuantity(p.getQuantity() + 1);
                 return;
             }
         }
@@ -28,9 +30,9 @@ public class ProductList {
     }
 
     // Delete product from the list of products
-    public boolean Delete(String name) {
+    public boolean Delete(int id) {
         for (Product p: products) {
-            if (p.getName().equals(name)) {
+            if (p.getId() == id) {
                 products.remove(p);
                 return true;
             }
@@ -38,11 +40,11 @@ public class ProductList {
         return false;
     }
 
-    // Edit product which name equals to name parameter and replace them with newProduct
-    public boolean Edit(String name, Product newProduct) {
+    // Edit product by id and replace them with newProduct
+    public boolean Edit(int id, Product newProduct) {
         for (Product p: products) {
             // find product with this name
-            if (p.getName().equals(name)) {
+            if (p.getId() == id) {
                 // get index of product which we should edit,
                 // remove it and insert new product to the same position
                 int index = products.indexOf(p);
@@ -64,18 +66,19 @@ public class ProductList {
             for (String line: lines) {
                 // get all words in current line
                 String[] words = line.split(" ");
-                if (line.length() < 3)
+                if (line.length() < Product.REQUIRED_FIELDS)
                     return false; // not enough parameters
                 // get info about product from current line
-                String name = words[0];
-                Integer price = Integer.parseInt(words[1]);
-                Integer count = Integer.parseInt(words[2]);
+                Integer id = Integer.parseInt(words[0]);
+                String name = words[1];
+                Integer price = Integer.parseInt(words[2]);
+                Integer quantity = Integer.parseInt(words[3]);
                 String description = "";
                 // if line contains description
-                for (int i = 3; i < words.length; i++)
+                for (int i = Product.REQUIRED_FIELDS; i < words.length; i++)
                     description += words[i] + " ";
 
-                Product product = new Product(name, price, count, description);
+                Product product = new Product(id, name, price, quantity, description);
                 products.add(product);
             }
             // all lines in file were correct
