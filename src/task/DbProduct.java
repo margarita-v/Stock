@@ -18,10 +18,20 @@ public class DbProduct {
         return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
     }
 
+    // Execute simple query without result set
+    private void executeQuery(String query) throws SQLException, ClassNotFoundException {
+        Connection connection = getConnection();
+
+        Statement statement = connection.createStatement();
+        statement.execute(query);
+
+        statement.close();
+        connection.close();
+    }
+
     // Create table
     public void createDatabase() throws SQLException, ClassNotFoundException {
-        Connection connection = getConnection();
-        String createTableSql = "CREATE TABLE Product("
+        String SQL_CREATE_TABLE = "CREATE TABLE Product("
                 + "id_product INTEGER NOT NULL, "
                 + "product_name VARCHAR(20) NOT NULL, "
                 + "price INTEGER NOT NULL, "
@@ -29,24 +39,19 @@ public class DbProduct {
                 + "description VARCHAR(256), "
                 + "PRIMARY KEY (id_product) "
                 + ")";
-
-        Statement statement = connection.createStatement();
-        statement.execute(createTableSql);
-
-        statement.close();
-        connection.close();
+        executeQuery(SQL_CREATE_TABLE);
     }
 
     // Drop table
     public void dropDatabase() throws SQLException, ClassNotFoundException {
-        Connection connection = getConnection();
-        String dropTableSQL = "DROP TABLE Product";
+        String SQL_DROP_TABLE = "DROP TABLE Product";
+        executeQuery(SQL_DROP_TABLE);
+    }
 
-        Statement statement = connection.createStatement();
-        statement.execute(dropTableSQL);
-
-        statement.close();
-        connection.close();
+    // Clear table
+    public void clearTable() throws SQLException, ClassNotFoundException {
+        String SQL_TRUNCATE_TABLE = "TRUNCATE TABLE Product";
+        executeQuery(SQL_TRUNCATE_TABLE);
     }
 
     // Get all records in database

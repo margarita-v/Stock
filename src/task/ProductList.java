@@ -4,15 +4,25 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ProductList {
 
     private List<Product> products;
+    private DbProduct dbProducts;
 
     public ProductList() {
         products = new ArrayList<>();
+        dbProducts = new DbProduct();
+        try {
+            dbProducts.createDatabase();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     // Add product to the list of products
@@ -94,6 +104,19 @@ public class ProductList {
         }
     }
 
+    // Load info from database
+    public boolean loadFromDatabase() {
+        try {
+            products = dbProducts.getAll();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
     // Save info to text file
     public void saveToFile(String fileName) {
         List<String> lines = new ArrayList<>();
@@ -103,6 +126,20 @@ public class ProductList {
         try {
             Files.write(Paths.get(fileName), lines, StandardCharsets.UTF_8);
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Save info to database
+    public void saveToDatabase() {
+        try {
+            dbProducts.clearTable();
+            for (Product p: products) {
+                dbProducts.insert(p);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
