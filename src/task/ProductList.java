@@ -74,6 +74,15 @@ public class ProductList {
         return false;
     }
 
+    // find product by id
+    public boolean find(int id) {
+        for (Product product: products) {
+            if (product.getId() == id)
+                return true;
+        }
+        return false;
+    }
+
     // Load info from text file
     public boolean loadFromFile(String fileName) {
         try {

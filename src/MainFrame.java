@@ -13,12 +13,12 @@ public class MainFrame extends JFrame implements ActionListener {
     private JMenuBar menuBar;
     private JMenu fileMenu, editMenu, openMenu, saveAsMenu;
     private JMenuItem newItem, txtFileItem, dbItem,
-            saveItem, saveAsTxtItem, saveAsDbItem,
-            closeItem, exitItem,
+            saveItem, saveAsTxtItem, saveAsDbItem, exitItem,
             addItem, editItem, deleteItem;
     private ProductTableModel tableModel;
 
     private ProductList productList;
+    private DialogFrame dialog;
 
     private void createMenuBar() {
         menuBar = new JMenuBar();
@@ -28,7 +28,7 @@ public class MainFrame extends JFrame implements ActionListener {
         fileMenu = new JMenu("File");
         fileMenu.setFont(font);
         editMenu = new JMenu("Edit");
-        editMenu.setEnabled(false);
+        editMenu.setEnabled(true);
         editMenu.setFont(font);
 
         menuBar.add(fileMenu);
@@ -73,12 +73,6 @@ public class MainFrame extends JFrame implements ActionListener {
         saveAsMenu.add(saveAsTxtItem);
         saveAsMenu.add(saveAsDbItem);
 
-        // Close item
-        closeItem = new JMenuItem("Close");
-        closeItem.addActionListener(this);
-        closeItem.setEnabled(false);
-        closeItem.setFont(font);
-
         // Exit item
         exitItem = new JMenuItem("Exit");
         exitItem.addActionListener(this);
@@ -88,7 +82,6 @@ public class MainFrame extends JFrame implements ActionListener {
         fileMenu.add(openMenu);
         fileMenu.add(saveItem);
         fileMenu.add(saveAsMenu);
-        fileMenu.add(closeItem);
         fileMenu.addSeparator();
         fileMenu.add(exitItem);
 
@@ -115,9 +108,10 @@ public class MainFrame extends JFrame implements ActionListener {
     private void createGui() {
         setContentPane(rootPanel);
         setVisible(true);
+        setTitle("Информация о товарах");
         createMenuBar();
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new Dimension(500, 400));
+        setPreferredSize(new Dimension(600, 500));
 
         productList = new ProductList();
         tableModel = new ProductTableModel(productList);
@@ -155,17 +149,68 @@ public class MainFrame extends JFrame implements ActionListener {
                 break;
             case "As database":
                 break;
-            case "Close":
-                break;
-            // Edit menu
+            //region Edit menu
+            // Add product
             case "Add":
+                dialog = new DialogFrame("Добавление товара");
+                dialog.setVisible(true);
+                Product product = dialog.getProduct();
+                if (product != null) {
+                    productList.add(product);
+                    table.updateUI();
+                }
                 break;
+            // Edit product
             case "Edit":
+                String result = JOptionPane.showInputDialog(this,
+                        "Введите ID товара, который требуется отредактировать.");
+                if (result != null) {
+                    try {
+                        int id = Integer.parseInt(result);
+                        if (!productList.find(id))
+                            JOptionPane.showMessageDialog(this,
+                                    "Товар с данным ID не найден.");
+                        else {
+                            dialog = new DialogFrame("Редактирование товара");
+                            dialog.setVisible(true);
+
+                            table.updateUI();
+                        }
+                    } catch (NumberFormatException e) {
+                        JOptionPane.showMessageDialog(this,
+                                "Введено неверное значение ID.",
+                                "Ошибка",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                }
                 break;
+            // Delete product
             case "Delete":
+                result = JOptionPane.showInputDialog(this,
+                        "Введите ID товара, который требуется удалить.");
+                if (result != null) {
+                    try {
+                        int id = Integer.parseInt(result);
+                        if (!productList.delete(id))
+                            JOptionPane.showMessageDialog(this, "Товар с данным ID не найден.");
+                        else {
+                            JOptionPane.showMessageDialog(this, "Товар был удален.");
+                            table.updateUI();
+                        }
+                    } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(this,
+                            "Введено неверное значение ID.",
+                            "Ошибка",
+                            JOptionPane.ERROR_MESSAGE);
+                    }
+                }
                 break;
+            //endregion
             case "Exit":
-                System.exit(0);
+                int dialogResult = JOptionPane.showConfirmDialog(this,
+                        "Вы уверены, что хотите выйти?", "Подтверждение", JOptionPane.YES_NO_OPTION);
+                if (dialogResult == JOptionPane.YES_OPTION)
+                    System.exit(0);
             default:
                 break;
         }
