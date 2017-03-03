@@ -34,17 +34,12 @@ public class ProductList {
     }
 
     // add product to the list of products
-    public void add(Product product) {
-        for (Product p: products) {
-            // product was found in list
-            // then increase product's count
-            if (p.equals(product)) {
-                p.setQuantity(p.getQuantity() + 1);
-                return;
-            }
+    public boolean add(Product product) {
+        if (!find(product.getId())) {
+            products.add(product);
+            return true;
         }
-        // add new product to list
-        products.add(product);
+        return false;
     }
 
     // Delete product from the list of products
@@ -60,8 +55,12 @@ public class ProductList {
 
     // Edit product by id and replace them with newProduct
     public boolean edit(int id, Product newProduct) {
+        // if not found searched product and newProduct is already exists
+        if (!find(id) || find(newProduct.getId()))
+            return false;
+
         for (Product p: products) {
-            // find product with this name
+            // find product with this id
             if (p.getId() == id) {
                 // get index of product which we should edit,
                 // remove it and insert new product to the same position
@@ -126,14 +125,12 @@ public class ProductList {
         try {
             products = dbProducts.getAll();
             return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        } catch (ClassNotFoundException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
             return false;
         }
     }
+
     // Save info to text file
     public void saveToFile(String fileName) {
         List<String> lines = new ArrayList<>();
@@ -154,9 +151,7 @@ public class ProductList {
             for (Product p: products) {
                 dbProducts.insert(p);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
