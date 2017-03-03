@@ -73,13 +73,23 @@ public class ProductList {
         return false;
     }
 
-    // find product by id
+    // Find product by id
     public boolean find(int id) {
         for (Product product: products) {
             if (product.getId() == id)
                 return true;
         }
         return false;
+    }
+
+    // Clear product list and drop database
+    public void clear() {
+        products.clear();
+        try {
+            dbProducts.dropDatabase();
+        } catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     // Load info from text file
@@ -147,7 +157,7 @@ public class ProductList {
     // Save info to database
     public void saveToDatabase() {
         try {
-            dbProducts.clearTable();
+            dbProducts.createDatabase();
             for (Product p: products) {
                 dbProducts.insert(p);
             }

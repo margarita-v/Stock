@@ -2,14 +2,17 @@ import task.Product;
 import task.ProductList;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 public class MainFrame extends JFrame implements ActionListener {
 
     private JPanel rootPanel;
     private JTable table;
+    private JMenuItem dbItem;
 
     private ProductList productList;
 
@@ -35,15 +38,16 @@ public class MainFrame extends JFrame implements ActionListener {
         txtFileItem.setFont(font);
         txtFileItem.addActionListener(this);
         // Open from database
-        JMenuItem dbItem = new JMenuItem("From database");
+        dbItem = new JMenuItem("From database");
         dbItem.setFont(font);
         dbItem.addActionListener(this);
+        dbItem.setEnabled(false);
 
         openMenu.add(txtFileItem);
         openMenu.add(dbItem);
 
-        JMenu saveAsMenu = new JMenu("Save As");
-        saveAsMenu.setFont(font);
+        JMenu saveMenu = new JMenu("Save");
+        saveMenu.setFont(font);
         // Save as text file
         JMenuItem saveToTxtItem = new JMenuItem("To text file");
         saveToTxtItem.setFont(font);
@@ -53,8 +57,8 @@ public class MainFrame extends JFrame implements ActionListener {
         saveToDbItem.setFont(font);
         saveToDbItem.addActionListener(this);
 
-        saveAsMenu.add(saveToTxtItem);
-        saveAsMenu.add(saveToDbItem);
+        saveMenu.add(saveToTxtItem);
+        saveMenu.add(saveToDbItem);
 
         // Exit item
         JMenuItem exitItem = new JMenuItem("Exit");
@@ -62,7 +66,7 @@ public class MainFrame extends JFrame implements ActionListener {
         exitItem.setFont(font);
 
         fileMenu.add(openMenu);
-        fileMenu.add(saveAsMenu);
+        fileMenu.add(saveMenu);
         fileMenu.addSeparator();
         fileMenu.add(exitItem);
 
@@ -115,13 +119,42 @@ public class MainFrame extends JFrame implements ActionListener {
         switch (actionEvent.getActionCommand()) {
             // Open
             case "From text file":
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setFileFilter(new FileNameExtensionFilter("Text files", "txt"));
+                int res = fileChooser.showOpenDialog(null);
+                if (res == JFileChooser.APPROVE_OPTION) {
+                    File file = fileChooser.getSelectedFile();
+                    if (productList.loadFromFile(file.getName())) {
+                        table.updateUI();
+                        JOptionPane.showMessageDialog(this, "Данные из файла были загружены.");
+                    }
+                    else
+                        JOptionPane.showMessageDialog(this,
+                                "Файл содержит неверные данные.",
+                                "Ошибка", JOptionPane.WARNING_MESSAGE);
+                }
                 break;
             case "From database":
+                if (productList.loadFromDatabase()) {
+                    table.updateUI();
+                    JOptionPane.showMessageDialog(this, "Данные из базы данных были загружены.");
+                }
                 break;
-            // Save as
+            // Save
             case "To text file":
+                fileChooser = new JFileChooser();
+                fileChooser.setFileFilter(new FileNameExtensionFilter("Text files", "txt"));
+                res = fileChooser.showSaveDialog(null);
+                if (res == JFileChooser.APPROVE_OPTION) {
+                    File file = fileChooser.getSelectedFile();
+                    productList.saveToFile(file.getName());
+                    JOptionPane.showMessageDialog(this, "Данные были сохранены в файл.");
+                }
                 break;
             case "To database":
+                productList.saveToDatabase();
+                JOptionPane.showMessageDialog(this, "Данные были сохранены в базу данных.");
+                dbItem.setEnabled(true);
                 break;
             //region Edit menu
             // Add product
@@ -198,8 +231,10 @@ public class MainFrame extends JFrame implements ActionListener {
             case "Exit":
                 int dialogResult = JOptionPane.showConfirmDialog(this,
                         "Вы уверены, что хотите выйти?", "Подтверждение", JOptionPane.YES_NO_OPTION);
-                if (dialogResult == JOptionPane.YES_OPTION)
+                if (dialogResult == JOptionPane.YES_OPTION) {
                     System.exit(0);
+                    productList.clear();
+                }
             default:
                 break;
         }
