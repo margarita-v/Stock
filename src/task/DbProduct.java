@@ -6,8 +6,9 @@ import java.util.List;
 
 public class DbProduct {
 
-    private static final String DB_DRIVER = "org.postgresql.Driver";
-    private static final String DB_URL = "jdbc:postgresql://localhost/ProductsDb";
+    private static final String DB_DRIVER = "org.h2.Driver";
+    private static final String DB_URL = "jdbc:h2:~/ProductsDb";
+    //private static final String DB_URL = "jdbc:postgresql://localhost/ProductsDb";
 
     private static final String DB_USER = "username";
     private static final String DB_PASSWORD = "password";

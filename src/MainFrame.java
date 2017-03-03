@@ -1,3 +1,6 @@
+import task.Product;
+import task.ProductList;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -6,16 +9,18 @@ import java.awt.event.ActionListener;
 public class MainFrame extends JFrame implements ActionListener {
 
     private JPanel rootPanel;
+    private JTable table;
     private JMenuBar menuBar;
     private JMenu fileMenu, editMenu, openMenu, saveAsMenu;
     private JMenuItem newItem, txtFileItem, dbItem,
             saveItem, saveAsTxtItem, saveAsDbItem,
             closeItem, exitItem,
             addItem, editItem, deleteItem;
-    private JTable table;
+    private ProductTableModel tableModel;
 
-    private void createGui() {
+    private ProductList productList;
 
+    private void createMenuBar() {
         menuBar = new JMenuBar();
         Font font = new Font("Arial", Font.PLAIN, 12);
 
@@ -104,12 +109,21 @@ public class MainFrame extends JFrame implements ActionListener {
         editMenu.add(editItem);
         editMenu.add(deleteItem);
 
-        // Configure main frame
+        setJMenuBar(menuBar);
+    }
+
+    private void createGui() {
         setContentPane(rootPanel);
         setVisible(true);
+        createMenuBar();
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setPreferredSize(new Dimension(500, 400));
-        setJMenuBar(menuBar);
+
+        productList = new ProductList();
+        tableModel = new ProductTableModel(productList);
+        table = new JTable(tableModel);
+
+        getContentPane().add(new JScrollPane(table));
         pack();
     }
 
@@ -125,6 +139,9 @@ public class MainFrame extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent actionEvent) {
         switch (actionEvent.getActionCommand()) {
             case "New":
+                Product p = new Product(5, "jhjh", 34, 4, "fghjk");
+                productList.add(p);
+                table.updateUI();
                 break;
             // Open
             case "From text file":

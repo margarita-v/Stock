@@ -13,20 +13,28 @@ public class ProductList {
     private List<Product> products;
     private DbProduct dbProducts;
 
+    public int size() {
+        return products.size();
+    }
+
+    public Product getProductByIndex(int index) {
+        return products.get(index);
+    }
+
     public ProductList() {
         products = new ArrayList<>();
         dbProducts = new DbProduct();
-        try {
+        /*try {
             dbProducts.createDatabase();
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
-    // Add product to the list of products
-    public void Add(Product product) {
+    // add product to the list of products
+    public void add(Product product) {
         for (Product p: products) {
             // product was found in list
             // then increase product's count
@@ -40,7 +48,7 @@ public class ProductList {
     }
 
     // Delete product from the list of products
-    public boolean Delete(int id) {
+    public boolean delete(int id) {
         for (Product p: products) {
             if (p.getId() == id) {
                 products.remove(p);
@@ -51,7 +59,7 @@ public class ProductList {
     }
 
     // Edit product by id and replace them with newProduct
-    public boolean Edit(int id, Product newProduct) {
+    public boolean edit(int id, Product newProduct) {
         for (Product p: products) {
             // find product with this name
             if (p.getId() == id) {
