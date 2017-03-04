@@ -6,6 +6,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 
 public class MainFrame extends JFrame implements ActionListener {
@@ -13,12 +15,15 @@ public class MainFrame extends JFrame implements ActionListener {
     private JPanel rootPanel;
     private JTable table;
     private JMenuItem dbItem;
+    private Font font;
+    private JPopupMenu popupMenu;
 
     private ProductList productList;
+    private int selectedId;
 
     private void createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
-        Font font = new Font("Arial", Font.PLAIN, 12);
+        font = new Font("Arial", Font.PLAIN, 12);
 
         // Main items of menu bar
         JMenu fileMenu = new JMenu("File");
@@ -90,6 +95,19 @@ public class MainFrame extends JFrame implements ActionListener {
         setJMenuBar(menuBar);
     }
 
+    private void createPopupMenu() {
+        popupMenu = new JPopupMenu();
+        JMenuItem popupEditItem = new JMenuItem("Edit product");
+        popupEditItem.setFont(font);
+        popupEditItem.addActionListener(this);
+        JMenuItem popupDeleteItem = new JMenuItem("Delete product");
+        popupDeleteItem.setFont(font);
+        popupDeleteItem.addActionListener(this);
+
+        popupMenu.add(popupEditItem);
+        popupMenu.add(popupDeleteItem);
+    }
+
     private void createGui() {
         setContentPane(rootPanel);
         setTitle("Информация о товарах");
@@ -100,8 +118,19 @@ public class MainFrame extends JFrame implements ActionListener {
         productList = new ProductList();
         ProductTableModel tableModel = new ProductTableModel(productList);
         table = new JTable(tableModel);
-
         getContentPane().add(new JScrollPane(table));
+
+        createPopupMenu();
+        table.setComponentPopupMenu(popupMenu);
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent mouseEvent) {
+                Point point = mouseEvent.getPoint();
+                int currentRow = table.rowAtPoint(point);
+                // get ID of chosen product
+                selectedId = (Integer) table.getValueAt(currentRow, 0);
+            }
+        });
         pack();
         setVisible(true);
     }
@@ -117,132 +146,173 @@ public class MainFrame extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
         switch (actionEvent.getActionCommand()) {
-            // Open
             case "From text file":
-                JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setFileFilter(new FileNameExtensionFilter("Text files", "txt"));
-                int res = fileChooser.showOpenDialog(null);
-                if (res == JFileChooser.APPROVE_OPTION) {
-                    File file = fileChooser.getSelectedFile();
-                    if (productList.loadFromFile(file.getName())) {
-                        table.updateUI();
-                        JOptionPane.showMessageDialog(this, "Данные из файла были загружены.");
-                    }
-                    else
-                        JOptionPane.showMessageDialog(this,
-                                "Файл содержит неверные данные.",
-                                "Ошибка", JOptionPane.WARNING_MESSAGE);
-                }
+                openFromTextFile();
                 break;
             case "From database":
-                if (productList.loadFromDatabase()) {
-                    table.updateUI();
-                    JOptionPane.showMessageDialog(this, "Данные из базы данных были загружены.");
-                }
+                openFromDatabase();
                 break;
-            // Save
             case "To text file":
-                fileChooser = new JFileChooser();
-                fileChooser.setFileFilter(new FileNameExtensionFilter("Text files", "txt"));
-                res = fileChooser.showSaveDialog(null);
-                if (res == JFileChooser.APPROVE_OPTION) {
-                    File file = fileChooser.getSelectedFile();
-                    productList.saveToFile(file.getName());
-                    JOptionPane.showMessageDialog(this, "Данные были сохранены в файл.");
-                }
+                saveToTextFile();
                 break;
             case "To database":
-                productList.saveToDatabase();
-                JOptionPane.showMessageDialog(this, "Данные были сохранены в базу данных.");
-                dbItem.setEnabled(true);
+                saveToDatabase();
                 break;
-            //region Edit menu
-            // Add product
             case "Add":
-                DialogFrame dialog = new DialogFrame("Добавление товара", null);
-                dialog.setVisible(true);
-                Product product = dialog.getProduct();
-                if (product != null) {
-                    if (productList.add(product)) {
-                        table.updateUI();
-                        JOptionPane.showMessageDialog(this, "Товар был добавлен.");
-                    }
-                    else
-                        JOptionPane.showMessageDialog(this,
-                                "Товар с данным ID уже существует.",
-                                "Ошибка", JOptionPane.WARNING_MESSAGE);
-                }
+                add();
                 break;
-            // Edit product
             case "Edit":
-                String result = JOptionPane.showInputDialog(this,
-                        "Введите ID товара, который требуется отредактировать.");
-                if (result != null) {
-                    try {
-                        int id = Integer.parseInt(result);
-                        Product productForEdit = productList.getById(id);
-                        if (productForEdit == null)
-                            JOptionPane.showMessageDialog(this,
-                                    "Товар с данным ID не найден.",
-                                    "Ошибка", JOptionPane.WARNING_MESSAGE);
-                        else {
-                            dialog = new DialogFrame("Редактирование товара", productForEdit);
-                            dialog.setVisible(true);
-                            Product newProduct = dialog.getProduct();
-                            // if user didn't canceled dialog
-                            if (newProduct != null) {
-                                if (productList.edit(id, newProduct)) {
-                                    table.updateUI();
-                                    JOptionPane.showMessageDialog(this, "Товар был отредактирован.");
-                                }
-                                else
-                                    JOptionPane.showMessageDialog(this,
-                                            "Товар с данным ID уже существует.",
-                                            "Ошибка", JOptionPane.WARNING_MESSAGE);
-                            }
-                        }
-                    } catch (NumberFormatException e) {
-                        JOptionPane.showMessageDialog(this,
-                                "Введено неверное значение ID.",
-                                "Ошибка",
-                                JOptionPane.ERROR_MESSAGE);
-                    }
-                }
+                edit();
                 break;
-            // Delete product
             case "Delete":
-                result = JOptionPane.showInputDialog(this,
-                        "Введите ID товара, который требуется удалить.");
-                if (result != null) {
-                    try {
-                        int id = Integer.parseInt(result);
-                        if (!productList.delete(id))
-                            JOptionPane.showMessageDialog(this,
-                                    "Товар с данным ID не найден.",
-                                    "Ошибка", JOptionPane.WARNING_MESSAGE);
-                        else {
-                            table.updateUI();
-                            JOptionPane.showMessageDialog(this, "Товар был удален.");
-                        }
-                    } catch (NumberFormatException e) {
-                    JOptionPane.showMessageDialog(this,
-                            "Введено неверное значение ID.",
-                            "Ошибка",
-                            JOptionPane.ERROR_MESSAGE);
-                    }
-                }
+                delete();
                 break;
-            //endregion
+            case "Edit product":
+                edit(selectedId, productList.getById(selectedId));
+                break;
+            case "Delete product":
+                productList.delete(selectedId);
+                table.updateUI();
+                JOptionPane.showMessageDialog(this, "Товар был удален.");
+                break;
             case "Exit":
-                int dialogResult = JOptionPane.showConfirmDialog(this,
-                        "Вы уверены, что хотите выйти?", "Подтверждение", JOptionPane.YES_NO_OPTION);
-                if (dialogResult == JOptionPane.YES_OPTION) {
-                    productList.clear();
-                    System.exit(0);
-                }
+                exit();
+                break;
             default:
                 break;
         }
     }
+
+    //region Menu management
+    private void openFromTextFile() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Text files", "txt"));
+        int res = fileChooser.showOpenDialog(null);
+        if (res == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            if (productList.loadFromFile(file.getName())) {
+                table.updateUI();
+                JOptionPane.showMessageDialog(this, "Данные из файла были загружены.");
+            }
+            else
+                JOptionPane.showMessageDialog(this,
+                        "Файл содержит неверные данные.",
+                        "Ошибка", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    private void openFromDatabase() {
+        if (productList.loadFromDatabase()) {
+            table.updateUI();
+            JOptionPane.showMessageDialog(this, "Данные из базы данных были загружены.");
+        }
+    }
+
+    private void saveToTextFile() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Text files", "txt"));
+        int res = fileChooser.showSaveDialog(null);
+        if (res == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            productList.saveToFile(file.getName());
+            JOptionPane.showMessageDialog(this, "Данные были сохранены в файл.");
+        }
+    }
+
+    private void saveToDatabase() {
+        productList.saveToDatabase();
+        JOptionPane.showMessageDialog(this, "Данные были сохранены в базу данных.");
+        dbItem.setEnabled(true);
+    }
+
+    private void add() {
+        DialogFrame dialog = new DialogFrame("Добавление товара", null);
+        dialog.setVisible(true);
+        Product product = dialog.getProduct();
+        if (product != null) {
+            if (productList.add(product)) {
+                table.updateUI();
+                JOptionPane.showMessageDialog(this, "Товар был добавлен.");
+            }
+            else
+                JOptionPane.showMessageDialog(this,
+                        "Товар с данным ID уже существует.",
+                        "Ошибка", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    private void edit() {
+        String result = JOptionPane.showInputDialog(this,
+                "Введите ID товара, который требуется отредактировать.");
+        if (result != null) {
+            try {
+                int id = Integer.parseInt(result);
+                Product productForEdit = productList.getById(id);
+                if (productForEdit == null)
+                    JOptionPane.showMessageDialog(this,
+                            "Товар с данным ID не найден.",
+                            "Ошибка", JOptionPane.WARNING_MESSAGE);
+                else
+                    edit(id, productForEdit);
+
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this,
+                        "Введено неверное значение ID.",
+                        "Ошибка",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void edit(int id, Product productForEdit) {
+        DialogFrame dialog = new DialogFrame("Редактирование товара", productForEdit);
+        dialog.setVisible(true);
+        Product newProduct = dialog.getProduct();
+        // if user didn't canceled dialog
+        if (newProduct != null) {
+            if (productList.edit(id, newProduct)) {
+                table.updateUI();
+                JOptionPane.showMessageDialog(this, "Товар был отредактирован.");
+                // ID of selected product was changed
+                selectedId = newProduct.getId();
+            } else
+                JOptionPane.showMessageDialog(this,
+                        "Товар с данным ID уже существует.",
+                        "Ошибка", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    private void delete() {
+        String result = JOptionPane.showInputDialog(this,
+                "Введите ID товара, который требуется удалить.");
+        if (result != null) {
+            try {
+                int id = Integer.parseInt(result);
+                if (!productList.delete(id))
+                    JOptionPane.showMessageDialog(this,
+                            "Товар с данным ID не найден.",
+                            "Ошибка", JOptionPane.WARNING_MESSAGE);
+                else {
+                    table.updateUI();
+                    JOptionPane.showMessageDialog(this, "Товар был удален.");
+                }
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this,
+                        "Введено неверное значение ID.",
+                        "Ошибка",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void exit() {
+        int dialogResult = JOptionPane.showConfirmDialog(this,
+                "Вы уверены, что хотите выйти?", "Подтверждение", JOptionPane.YES_NO_OPTION);
+        if (dialogResult == JOptionPane.YES_OPTION) {
+            productList.clear();
+            System.exit(0);
+        }
+    }
+    //endregion
 }
 
