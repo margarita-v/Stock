@@ -159,7 +159,7 @@ public class MainFrame extends JFrame implements ActionListener {
             //region Edit menu
             // Add product
             case "Add":
-                DialogFrame dialog = new DialogFrame("Добавление товара");
+                DialogFrame dialog = new DialogFrame("Добавление товара", null);
                 dialog.setVisible(true);
                 Product product = dialog.getProduct();
                 if (product != null) {
@@ -180,21 +180,26 @@ public class MainFrame extends JFrame implements ActionListener {
                 if (result != null) {
                     try {
                         int id = Integer.parseInt(result);
-                        if (!productList.find(id))
+                        Product productForEdit = productList.getById(id);
+                        if (productForEdit == null)
                             JOptionPane.showMessageDialog(this,
                                     "Товар с данным ID не найден.",
                                     "Ошибка", JOptionPane.WARNING_MESSAGE);
                         else {
-                            dialog = new DialogFrame("Редактирование товара");
+                            dialog = new DialogFrame("Редактирование товара", productForEdit);
                             dialog.setVisible(true);
-                            if (productList.edit(id, dialog.getProduct())) {
-                                table.updateUI();
-                                JOptionPane.showMessageDialog(this, "Товар был отредактирован.");
+                            Product newProduct = dialog.getProduct();
+                            // if user didn't canceled dialog
+                            if (newProduct != null) {
+                                if (productList.edit(id, newProduct)) {
+                                    table.updateUI();
+                                    JOptionPane.showMessageDialog(this, "Товар был отредактирован.");
+                                }
+                                else
+                                    JOptionPane.showMessageDialog(this,
+                                            "Товар с данным ID уже существует.",
+                                            "Ошибка", JOptionPane.WARNING_MESSAGE);
                             }
-                            else
-                                JOptionPane.showMessageDialog(this,
-                                        "Товар с данным ID уже существует.",
-                                        "Ошибка", JOptionPane.WARNING_MESSAGE);
                         }
                     } catch (NumberFormatException e) {
                         JOptionPane.showMessageDialog(this,
@@ -232,8 +237,8 @@ public class MainFrame extends JFrame implements ActionListener {
                 int dialogResult = JOptionPane.showConfirmDialog(this,
                         "Вы уверены, что хотите выйти?", "Подтверждение", JOptionPane.YES_NO_OPTION);
                 if (dialogResult == JOptionPane.YES_OPTION) {
-                    System.exit(0);
                     productList.clear();
+                    System.exit(0);
                 }
             default:
                 break;

@@ -24,15 +24,37 @@ public class ProductList {
     public ProductList() {
         products = new ArrayList<>();
         dbProducts = new DbProduct();
-        /*try {
-            dbProducts.createDatabase();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }*/
     }
 
+    //region Helpful functions
+    // Find product by id
+    private boolean find(int id) {
+        for (Product product: products) {
+            if (product.getId() == id)
+                return true;
+        }
+        return false;
+    }
+
+    // Get product's index by id
+    private int getIndex(int id) {
+        Product product = getById(id);
+        if (product != null)
+            return products.indexOf(product);
+        return -1;
+    }
+
+    // Get product by id
+    public Product getById(int id) {
+        for (Product product: products) {
+            if (product.getId() == id)
+                return product;
+        }
+        return null;
+    }
+    //endregion
+
+    //region Edit functions
     // add product to the list of products
     public boolean add(Product product) {
         if (!find(product.getId())) {
@@ -44,43 +66,46 @@ public class ProductList {
 
     // Delete product from the list of products
     public boolean delete(int id) {
-        for (Product p: products) {
-            if (p.getId() == id) {
-                products.remove(p);
-                return true;
-            }
+        Product product = getById(id);
+        if (product != null) {
+            products.remove(product);
+            return true;
         }
         return false;
     }
 
     // Edit product by id and replace them with newProduct
     public boolean edit(int id, Product newProduct) {
-        // if not found searched product and newProduct is already exists
-        if (!find(id) || find(newProduct.getId()))
-            return false;
-
-        for (Product p: products) {
-            // find product with this id
-            if (p.getId() == id) {
+        if (find(id)) {
+            // ID wasn't changed, but other fields were changed
+            if (id == newProduct.getId()) {
                 // get index of product which we should edit,
                 // remove it and insert new product to the same position
-                int index = products.indexOf(p);
+                int index = getIndex(id);
                 products.remove(index);
                 products.add(index, newProduct);
                 return true;
             }
+            else {
+                // ID and other info were changed
+                if (!find(newProduct.getId())) {
+                    // get index of product which we should edit,
+                    // remove it and insert new product to the same position
+                    int index = getIndex(id);
+                    products.remove(index);
+                    products.add(index, newProduct);
+                    return true;
+                }
+                else
+                    // list contains product with ID which equals new product's ID
+                    return false;
+            }
         }
-        return false;
+        else
+            // product with this ID not found
+            return false;
     }
-
-    // Find product by id
-    public boolean find(int id) {
-        for (Product product: products) {
-            if (product.getId() == id)
-                return true;
-        }
-        return false;
-    }
+    //endregion
 
     // Clear product list and drop database
     public void clear() {

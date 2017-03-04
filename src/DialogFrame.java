@@ -16,13 +16,21 @@ public class DialogFrame extends JDialog implements KeyListener {
     private JLabel lblError;
     private Product product;
 
-    public DialogFrame(String title) {
+    public DialogFrame(String title, Product productForEdit) {
         lblError.setText("");
         setContentPane(contentPane);
         setModal(true);
         setTitle(title);
         getRootPane().setDefaultButton(buttonOK);
         setPreferredSize(new Dimension(400, 300));
+
+        if (productForEdit != null) {
+            textFieldId.setText(Integer.toString(productForEdit.getId()));
+            textFieldName.setText(productForEdit.getName());
+            textFieldPrice.setText(Integer.toString(productForEdit.getPrice()));
+            textFieldCount.setText(Integer.toString(productForEdit.getQuantity()));
+            textFieldDescription.setText(productForEdit.getDescription());
+        }
 
         buttonOK.addActionListener(e -> onOK());
 
