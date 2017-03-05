@@ -36,7 +36,10 @@ public class ProductTableModel implements TableModel {
 
     @Override
     public Class<?> getColumnClass(int i) {
-        return String.class;
+        if (productList.size() == 0) {
+            return Object.class;
+        }
+        return getValueAt(0, i).getClass();
     }
 
     @Override

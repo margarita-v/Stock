@@ -107,22 +107,17 @@ public class ProductList {
     }
     //endregion
 
-    // Clear product list and drop database
+    // Clear product list
     public void clear() {
         products.clear();
-        try {
-            dbProducts.dropDatabase();
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
     }
 
     // Load info from text file
     public boolean loadFromFile(String fileName) {
+        clear();
         try {
             // read all lines in text file
             List<String> lines = Files.readAllLines(Paths.get(fileName), StandardCharsets.UTF_8);
-            products.clear();
 
             for (String line: lines) {
                 // get all words in current line
@@ -157,6 +152,7 @@ public class ProductList {
 
     // Load info from database
     public boolean loadFromDatabase() {
+        clear();
         try {
             products = dbProducts.getAll();
             return true;

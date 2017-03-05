@@ -3,6 +3,7 @@ import task.ProductList;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -79,18 +80,23 @@ public class MainFrame extends JFrame implements ActionListener {
         JMenuItem addItem = new JMenuItem("Add");
         JMenuItem editItem = new JMenuItem("Edit");
         JMenuItem deleteItem = new JMenuItem("Delete");
+        JMenuItem clearItem = new JMenuItem("Clear");
         // Set action listener
         addItem.addActionListener(this);
         editItem.addActionListener(this);
         deleteItem.addActionListener(this);
+        clearItem.addActionListener(this);
         // Set font
         addItem.setFont(font);
         editItem.setFont(font);
         deleteItem.setFont(font);
+        clearItem.setFont(font);
 
         editMenu.add(addItem);
         editMenu.add(editItem);
         editMenu.add(deleteItem);
+        editMenu.addSeparator();
+        editMenu.add(clearItem);
 
         setJMenuBar(menuBar);
     }
@@ -119,6 +125,18 @@ public class MainFrame extends JFrame implements ActionListener {
         ProductTableModel tableModel = new ProductTableModel(productList);
         table = new JTable(tableModel);
         getContentPane().add(new JScrollPane(table));
+
+        /*
+        TableRowSorter sorter = new TableRowSorter(tableModel);
+        List<RowSorter.SortKey> sortKeys = new ArrayList<>();
+        sortKeys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+        sorter.setSortKeys(sortKeys);
+        table.setRowSorter(sorter);
+        */
+
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        table.setDefaultRenderer(Integer.class, centerRenderer);
 
         createPopupMenu();
         table.setComponentPopupMenu(popupMenu);
@@ -167,6 +185,9 @@ public class MainFrame extends JFrame implements ActionListener {
             case "Delete":
                 delete();
                 break;
+            case "Clear":
+                clear();
+                break;
             case "Edit product":
                 edit(selectedId, productList.getById(selectedId));
                 break;
@@ -191,6 +212,7 @@ public class MainFrame extends JFrame implements ActionListener {
         if (res == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
             if (productList.loadFromFile(file.getName())) {
+                table.setAutoCreateRowSorter(true);
                 table.updateUI();
                 JOptionPane.showMessageDialog(this, "Данные из файла были загружены.");
             }
@@ -231,6 +253,7 @@ public class MainFrame extends JFrame implements ActionListener {
         Product product = dialog.getProduct();
         if (product != null) {
             if (productList.add(product)) {
+                table.setAutoCreateRowSorter(true);
                 table.updateUI();
                 JOptionPane.showMessageDialog(this, "Товар был добавлен.");
             }
@@ -242,26 +265,30 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     private void edit() {
-        String result = JOptionPane.showInputDialog(this,
-                "Введите ID товара, который требуется отредактировать.");
-        if (result != null) {
-            try {
-                int id = Integer.parseInt(result);
-                Product productForEdit = productList.getById(id);
-                if (productForEdit == null)
-                    JOptionPane.showMessageDialog(this,
-                            "Товар с данным ID не найден.",
-                            "Ошибка", JOptionPane.WARNING_MESSAGE);
-                else
-                    edit(id, productForEdit);
+        if (productList.size() > 0) {
+            String result = JOptionPane.showInputDialog(this,
+                    "Введите ID товара, который требуется отредактировать.");
+            if (result != null) {
+                try {
+                    int id = Integer.parseInt(result);
+                    Product productForEdit = productList.getById(id);
+                    if (productForEdit == null)
+                        JOptionPane.showMessageDialog(this,
+                                "Товар с данным ID не найден.",
+                                "Ошибка", JOptionPane.WARNING_MESSAGE);
+                    else
+                        edit(id, productForEdit);
 
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this,
-                        "Введено неверное значение ID.",
-                        "Ошибка",
-                        JOptionPane.ERROR_MESSAGE);
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(this,
+                            "Введено неверное значение ID.",
+                            "Ошибка",
+                            JOptionPane.ERROR_MESSAGE);
+                }
             }
         }
+        else
+            JOptionPane.showMessageDialog(this, "Список товаров пуст.");
     }
 
     private void edit(int id, Product productForEdit) {
@@ -283,26 +310,45 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     private void delete() {
-        String result = JOptionPane.showInputDialog(this,
-                "Введите ID товара, который требуется удалить.");
-        if (result != null) {
-            try {
-                int id = Integer.parseInt(result);
-                if (!productList.delete(id))
+        if (productList.size() > 0) {
+            String result = JOptionPane.showInputDialog(this,
+                    "Введите ID товара, который требуется удалить.");
+            if (result != null) {
+                try {
+                    int id = Integer.parseInt(result);
+                    if (!productList.delete(id))
+                        JOptionPane.showMessageDialog(this,
+                                "Товар с данным ID не найден.",
+                                "Ошибка", JOptionPane.WARNING_MESSAGE);
+                    else {
+                        table.setAutoCreateRowSorter(true);
+                        table.updateUI();
+                        JOptionPane.showMessageDialog(this, "Товар был удален.");
+                    }
+                } catch (NumberFormatException e) {
                     JOptionPane.showMessageDialog(this,
-                            "Товар с данным ID не найден.",
-                            "Ошибка", JOptionPane.WARNING_MESSAGE);
-                else {
-                    table.updateUI();
-                    JOptionPane.showMessageDialog(this, "Товар был удален.");
+                            "Введено неверное значение ID.",
+                            "Ошибка",
+                            JOptionPane.ERROR_MESSAGE);
                 }
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this,
-                        "Введено неверное значение ID.",
-                        "Ошибка",
-                        JOptionPane.ERROR_MESSAGE);
             }
         }
+        else
+            JOptionPane.showMessageDialog(this, "Список товаров пуст.");
+    }
+
+    private void clear() {
+        if (productList.size() > 0) {
+            int dialogResult = JOptionPane.showConfirmDialog(this,
+                    "Очистить список товаров?", "Подтверждение", JOptionPane.YES_NO_OPTION);
+            if (dialogResult == JOptionPane.YES_OPTION) {
+                productList.clear();
+                table.updateUI();
+                JOptionPane.showMessageDialog(this, "Товары были удалены.");
+            }
+        }
+        else
+            JOptionPane.showMessageDialog(this, "Список товаров пуст.");
     }
 
     private void exit() {
