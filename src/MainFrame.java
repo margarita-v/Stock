@@ -5,10 +5,7 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.File;
 
 public class MainFrame extends JFrame implements ActionListener {
@@ -41,13 +38,14 @@ public class MainFrame extends JFrame implements ActionListener {
         openMenu.setFont(font);
         // Open from text file
         JMenuItem txtFileItem = new JMenuItem("From text file");
+        txtFileItem.setAccelerator(KeyStroke.getKeyStroke('O',
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         txtFileItem.setFont(font);
         txtFileItem.addActionListener(this);
         // Open from database
         dbItem = new JMenuItem("From database");
         dbItem.setFont(font);
         dbItem.addActionListener(this);
-        dbItem.setEnabled(false);
 
         openMenu.add(txtFileItem);
         openMenu.add(dbItem);
@@ -56,6 +54,8 @@ public class MainFrame extends JFrame implements ActionListener {
         saveMenu.setFont(font);
         // Save as text file
         JMenuItem saveToTxtItem = new JMenuItem("To text file");
+        saveToTxtItem.setAccelerator(KeyStroke.getKeyStroke('S',
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         saveToTxtItem.setFont(font);
         saveToTxtItem.addActionListener(this);
         // Save as database
@@ -68,6 +68,7 @@ public class MainFrame extends JFrame implements ActionListener {
 
         // Exit item
         JMenuItem exitItem = new JMenuItem("Exit");
+        exitItem.setMnemonic(KeyEvent.VK_ESCAPE);
         exitItem.addActionListener(this);
         exitItem.setFont(font);
 
@@ -206,7 +207,9 @@ public class MainFrame extends JFrame implements ActionListener {
 
     //region Menu management
     private void openFromTextFile() {
+        File workingDirectory = new File(System.getProperty("user.dir"));
         JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(workingDirectory);
         fileChooser.setFileFilter(new FileNameExtensionFilter("Text files", "txt"));
         int res = fileChooser.showOpenDialog(null);
         if (res == JFileChooser.APPROVE_OPTION) {
@@ -225,6 +228,7 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private void openFromDatabase() {
         if (productList.loadFromDatabase()) {
+            table.setAutoCreateRowSorter(true);
             table.updateUI();
             JOptionPane.showMessageDialog(this, "Данные из базы данных были загружены.");
         }
@@ -267,7 +271,8 @@ public class MainFrame extends JFrame implements ActionListener {
     private void edit() {
         if (productList.size() > 0) {
             String result = JOptionPane.showInputDialog(this,
-                    "Введите ID товара, который требуется отредактировать.");
+                    "Введите ID товара, который требуется отредактировать.",
+                    "Редактирование", JOptionPane.DEFAULT_OPTION);
             if (result != null) {
                 try {
                     int id = Integer.parseInt(result);
@@ -312,7 +317,8 @@ public class MainFrame extends JFrame implements ActionListener {
     private void delete() {
         if (productList.size() > 0) {
             String result = JOptionPane.showInputDialog(this,
-                    "Введите ID товара, который требуется удалить.");
+                    "Введите ID товара, который требуется удалить.",
+                    "Удаление", JOptionPane.DEFAULT_OPTION);
             if (result != null) {
                 try {
                     int id = Integer.parseInt(result);

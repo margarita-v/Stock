@@ -31,6 +31,7 @@ public class DbProduct {
     }
 
     // Create table
+    /*
     public void createDatabase() throws SQLException, ClassNotFoundException {
         String SQL_CREATE_TABLE = "CREATE TABLE Product("
                 + "id_product INTEGER NOT NULL, "
@@ -47,7 +48,7 @@ public class DbProduct {
     public void dropDatabase() throws SQLException, ClassNotFoundException {
         String SQL_DROP_TABLE = "DROP TABLE Product";
         executeQuery(SQL_DROP_TABLE);
-    }
+    }*/
 
     // Clear table
     public void clearTable() throws SQLException, ClassNotFoundException {

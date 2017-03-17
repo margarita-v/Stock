@@ -178,7 +178,7 @@ public class ProductList {
     // Save info to database
     public void saveToDatabase() {
         try {
-            dbProducts.createDatabase();
+            dbProducts.clearTable();
             for (Product p: products) {
                 dbProducts.insert(p);
             }
