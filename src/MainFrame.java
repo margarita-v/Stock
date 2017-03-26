@@ -7,6 +7,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.util.List;
 
 public class MainFrame extends JFrame implements ActionListener {
 
@@ -81,21 +82,25 @@ public class MainFrame extends JFrame implements ActionListener {
         JMenuItem addItem = new JMenuItem("Add");
         JMenuItem editItem = new JMenuItem("Edit");
         JMenuItem deleteItem = new JMenuItem("Delete");
+        JMenuItem deleteManyItem = new JMenuItem("Delete many");
         JMenuItem clearItem = new JMenuItem("Clear");
         // Set action listener
         addItem.addActionListener(this);
         editItem.addActionListener(this);
         deleteItem.addActionListener(this);
+        deleteManyItem.addActionListener(this);
         clearItem.addActionListener(this);
         // Set font
         addItem.setFont(font);
         editItem.setFont(font);
         deleteItem.setFont(font);
+        deleteManyItem.setFont(font);
         clearItem.setFont(font);
 
         editMenu.add(addItem);
         editMenu.add(editItem);
         editMenu.add(deleteItem);
+        editMenu.add(deleteManyItem);
         editMenu.addSeparator();
         editMenu.add(clearItem);
 
@@ -185,6 +190,9 @@ public class MainFrame extends JFrame implements ActionListener {
                 break;
             case "Delete":
                 delete();
+                break;
+            case "Delete many":
+                deleteMany();
                 break;
             case "Clear":
                 clear();
@@ -338,6 +346,28 @@ public class MainFrame extends JFrame implements ActionListener {
                             JOptionPane.ERROR_MESSAGE);
                 }
             }
+        }
+        else
+            JOptionPane.showMessageDialog(this, "Список товаров пуст.");
+    }
+
+    private void deleteMany() {
+        if (productList.size() > 0) {
+            DeleteManyFrame dialog = new DeleteManyFrame(productList.getProductsIDs());
+            dialog.setVisible(true);
+            List<Integer> chosenItems = dialog.getChosenIDs();
+            if (chosenItems.size() > 0) {
+                for (Integer id : chosenItems) {
+                    productList.delete(id);
+                }
+                table.setAutoCreateRowSorter(true);
+                table.updateUI();
+                JOptionPane.showMessageDialog(this, "Выбранные товары были удалены.");
+            }
+            else
+                JOptionPane.showMessageDialog(this,
+                        "Ни одного товара для удаления не выбрано",
+                        "Информация", JOptionPane.INFORMATION_MESSAGE);
         }
         else
             JOptionPane.showMessageDialog(this, "Список товаров пуст.");

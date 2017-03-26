@@ -13,6 +13,11 @@ public class ProductList {
     private List<Product> products;
     private DbProduct dbProducts;
 
+    public ProductList() {
+        products = new ArrayList<>();
+        dbProducts = new DbProduct();
+    }
+
     public int size() {
         return products.size();
     }
@@ -21,9 +26,12 @@ public class ProductList {
         return products.get(index);
     }
 
-    public ProductList() {
-        products = new ArrayList<>();
-        dbProducts = new DbProduct();
+    public List<Integer> getProductsIDs() {
+        List<Integer> result = new ArrayList<>();
+        for (Product product: products) {
+            result.add(product.getId());
+        }
+        return result;
     }
 
     //region Helpful functions
