@@ -22,10 +22,18 @@ public class ProductList {
         return products.size();
     }
 
+    public ProductList filter() {
+        ProductList result = this;
+        return this;
+    }
+
+    //region Helpful functions
+    // Get product by index in product list; need for product table model
     public Product getProductByIndex(int index) {
         return products.get(index);
     }
 
+    // Get ids of all products; need for delete a set of products
     public List<Integer> getProductsIDs() {
         List<Integer> result = new ArrayList<>();
         for (Product product: products) {
@@ -34,7 +42,6 @@ public class ProductList {
         return result;
     }
 
-    //region Helpful functions
     // Find product by id
     private boolean find(int id) {
         for (Product product: products) {
@@ -63,7 +70,7 @@ public class ProductList {
     //endregion
 
     //region Edit functions
-    // add product to the list of products
+    // Add product to the list of products
     public boolean add(Product product) {
         if (!find(product.getId())) {
             products.add(product);
@@ -113,13 +120,14 @@ public class ProductList {
             // product with this ID not found
             return false;
     }
-    //endregion
 
     // Clear product list
     public void clear() {
         products.clear();
     }
+    //endregion
 
+    //region Load and save functions
     // Load info from text file
     public boolean loadFromFile(String fileName) {
         clear();
@@ -194,4 +202,5 @@ public class ProductList {
             e.printStackTrace();
         }
     }
+    //endregion
 }

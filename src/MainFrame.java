@@ -27,11 +27,13 @@ public class MainFrame extends JFrame implements ActionListener {
         // Main items of menu bar
         JMenu fileMenu = new JMenu("File");
         fileMenu.setFont(font);
+        JMenu viewMenu = new JMenu("View");
+        viewMenu.setFont(font);
         JMenu editMenu = new JMenu("Edit");
-        editMenu.setEnabled(true);
         editMenu.setFont(font);
 
         menuBar.add(fileMenu);
+        menuBar.add(viewMenu);
         menuBar.add(editMenu);
 
         // Configure file menu
@@ -77,6 +79,32 @@ public class MainFrame extends JFrame implements ActionListener {
         fileMenu.add(saveMenu);
         fileMenu.addSeparator();
         fileMenu.add(exitItem);
+
+        // Configure view menu
+        JMenu filterMenu = new JMenu("Filter");
+        filterMenu.setFont(font);
+        // Items of filter menu
+        JMenuItem moreFilterItem = new JMenuItem("Price more than value");
+        JMenuItem lessFilterItem = new JMenuItem("Price less than value");
+        JMenuItem rangeFilterItem = new JMenuItem("Set price range");
+        JMenuItem clearFilterItem = new JMenuItem("Clear filter");
+        // Set action listener
+        moreFilterItem.addActionListener(this);
+        lessFilterItem.addActionListener(this);
+        rangeFilterItem.addActionListener(this);
+        clearFilterItem.addActionListener(this);
+        // Set font
+        moreFilterItem.setFont(font);
+        lessFilterItem.setFont(font);
+        rangeFilterItem.setFont(font);
+        clearFilterItem.setFont(font);
+
+        filterMenu.add(moreFilterItem);
+        filterMenu.add(lessFilterItem);
+        filterMenu.add(rangeFilterItem);
+        filterMenu.addSeparator();
+        filterMenu.add(clearFilterItem);
+        viewMenu.add(filterMenu);
 
         // Configure edit menu
         JMenuItem addItem = new JMenuItem("Add");
@@ -167,9 +195,11 @@ public class MainFrame extends JFrame implements ActionListener {
         EventQueue.invokeLater(MainFrame::new);
     }
 
+    // User selection of menu item
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
         switch (actionEvent.getActionCommand()) {
+            // File menu
             case "From text file":
                 openFromTextFile();
                 break;
@@ -182,6 +212,23 @@ public class MainFrame extends JFrame implements ActionListener {
             case "To database":
                 saveToDatabase();
                 break;
+            case "Exit":
+                exit();
+                break;
+            // View menu
+            case "Price more than value":
+                priceMoreFilter();
+                break;
+            case "Price less than filter":
+                priceLessFilter();
+                break;
+            case "Set price range":
+                priceRangeFilter();
+                break;
+            case "Clear filter":
+                clearFilter();
+                break;
+            // Edit menu
             case "Add":
                 add();
                 break;
@@ -197,6 +244,7 @@ public class MainFrame extends JFrame implements ActionListener {
             case "Clear":
                 clear();
                 break;
+            // Popup menu
             case "Edit product":
                 edit(selectedId, productList.getById(selectedId));
                 break;
@@ -205,15 +253,13 @@ public class MainFrame extends JFrame implements ActionListener {
                 table.updateUI();
                 JOptionPane.showMessageDialog(this, "Товар был удален.");
                 break;
-            case "Exit":
-                exit();
-                break;
             default:
                 break;
         }
     }
 
     //region Menu management
+    // File menu
     private void openFromTextFile() {
         File workingDirectory = new File(System.getProperty("user.dir"));
         JFileChooser fileChooser = new JFileChooser();
@@ -259,6 +305,65 @@ public class MainFrame extends JFrame implements ActionListener {
         dbItem.setEnabled(true);
     }
 
+    private void exit() {
+        int dialogResult = JOptionPane.showConfirmDialog(this,
+                "Вы уверены, что хотите выйти?", "Подтверждение", JOptionPane.YES_NO_OPTION);
+        if (dialogResult == JOptionPane.YES_OPTION) {
+            productList.clear();
+            System.exit(0);
+        }
+    }
+
+    // View menu
+    private void priceMoreFilter() {
+        if (productList.size() > 0) {
+            String result = JOptionPane.showInputDialog(this,
+                    "Введите минимальное значение цены.",
+                    "Фильтр по цене", JOptionPane.DEFAULT_OPTION);
+            if (result != null) {
+                try {
+
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(this,
+                            "Введено неверное значение цены.",
+                            "Ошибка",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
+        else
+            JOptionPane.showMessageDialog(this, "Список товаров пуст.");
+    }
+
+    private void priceLessFilter() {
+        if (productList.size() > 0) {
+            String result = JOptionPane.showInputDialog(this,
+                    "Введите максимальное значение цены.",
+                    "Фильтр по цене", JOptionPane.DEFAULT_OPTION);
+            if (result != null) {
+                try {
+
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(this,
+                            "Введено неверное значение цены.",
+                            "Ошибка",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
+        else
+            JOptionPane.showMessageDialog(this, "Список товаров пуст.");
+    }
+
+    private void priceRangeFilter() {
+
+    }
+
+    private void clearFilter() {
+
+    }
+
+    // Edit menu
     private void add() {
         DialogFrame dialog = new DialogFrame("Добавление товара", null);
         dialog.setVisible(true);
@@ -385,15 +490,6 @@ public class MainFrame extends JFrame implements ActionListener {
         }
         else
             JOptionPane.showMessageDialog(this, "Список товаров пуст.");
-    }
-
-    private void exit() {
-        int dialogResult = JOptionPane.showConfirmDialog(this,
-                "Вы уверены, что хотите выйти?", "Подтверждение", JOptionPane.YES_NO_OPTION);
-        if (dialogResult == JOptionPane.YES_OPTION) {
-            productList.clear();
-            System.exit(0);
-        }
     }
     //endregion
 }
