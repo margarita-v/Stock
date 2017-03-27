@@ -56,13 +56,13 @@ public class PriceFilterFrame extends JDialog {
     }
 
     private void onOK() {
-        String minStr = ftfMinPrice.getText();
-        String maxStr = ftfMaxPrice.getText();
+        Object minObj = ftfMinPrice.getValue();
+        Object maxObj = ftfMaxPrice.getValue();
 
-        if (!Objects.equals(minStr, "") && !Objects.equals(maxStr, "")) {
+        if (!Objects.equals(minObj, null) && !Objects.equals(maxObj, null)) {
             try {
-                minPrice = Integer.parseInt(minStr);
-                maxPrice = Integer.parseInt(maxStr);
+                minPrice = (int) minObj;
+                maxPrice = (int) maxObj;
 
                 if (minPrice > maxPrice) {
                     int temp = minPrice;

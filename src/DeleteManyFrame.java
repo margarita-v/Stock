@@ -5,13 +5,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DeleteManyFrame extends JDialog {
+    // Default widgets
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
+
+    // Panel for checkboxes
     private JPanel itemsPane;
+    // IDs of products which were chosen
     private List<Integer> chosenItems;
 
-    public DeleteManyFrame(List<Integer> productsIDs) {
+    DeleteManyFrame(List<Integer> productsIDs) {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
@@ -26,12 +30,10 @@ public class DeleteManyFrame extends JDialog {
         for (JCheckBox checkBox: cbList) {
             checkBox.addItemListener(itemEvent -> {
                 int id = Integer.parseInt(checkBox.getText());
-                if (checkBox.isSelected()) {
+                if (checkBox.isSelected())
                     chosenItems.add(id);
-                }
-                else if (chosenItems.contains(id)) {
+                else if (chosenItems.contains(id))
                     chosenItems.remove(id);
-                }
             });
             itemsPane.add(checkBox);
         }
@@ -56,10 +58,6 @@ public class DeleteManyFrame extends JDialog {
         pack();
     }
 
-    public List<Integer> getChosenIDs() {
-        return chosenItems;
-    }
-
     private void onOK() {
         // add your code here
         dispose();
@@ -68,5 +66,9 @@ public class DeleteManyFrame extends JDialog {
     private void onCancel() {
         // add your code here if necessary
         dispose();
+    }
+
+    List<Integer> getChosenIDs() {
+        return chosenItems;
     }
 }

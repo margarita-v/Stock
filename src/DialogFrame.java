@@ -43,10 +43,10 @@ public class DialogFrame extends JDialog {
 
         // Pre-filling product's fields if this dialog is using for edit
         if (productForEdit != null) {
-            ftfId.setText(Integer.toString(productForEdit.getId()));
+            ftfId.setValue(productForEdit.getId());
             textFieldName.setText(productForEdit.getName());
-            ftfPrice.setText(Integer.toString(productForEdit.getPrice()));
-            ftfCount.setText(Integer.toString(productForEdit.getQuantity()));
+            ftfPrice.setValue(productForEdit.getPrice());
+            ftfCount.setValue(productForEdit.getQuantity());
             textFieldDescription.setText(productForEdit.getDescription());
         }
 
@@ -71,17 +71,17 @@ public class DialogFrame extends JDialog {
     }
 
     private void onOK() {
-        String idStr = ftfId.getText();
+        Object idObj = ftfId.getValue();
         String name = textFieldName.getText();
-        String countStr = ftfCount.getText();
-        String priceStr = ftfPrice.getText();
+        Object countObj = ftfCount.getValue();
+        Object priceObj = ftfPrice.getValue();
 
-        if (!Objects.equals(idStr, "") && !Objects.equals(name, "")
-                && !Objects.equals(countStr, "") && !Objects.equals(priceStr, "")) {
+        if (!Objects.equals(idObj, null) && !Objects.equals(name, "")
+                && !Objects.equals(countObj, null) && !Objects.equals(priceObj, null)) {
             try {
-                int id = Integer.parseInt(idStr);
-                int price = Integer.parseInt(priceStr);
-                int count = Integer.parseInt(countStr);
+                int id = (int) idObj;
+                int price = (int) priceObj;
+                int count = (int) countObj;
 
                 product = new Product(id, name, price, count, textFieldDescription.getText());
                 dispose();
