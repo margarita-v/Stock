@@ -96,6 +96,13 @@ public class MainFrame extends JFrame implements ActionListener {
         lessFilterItem.addActionListener(this);
         rangeFilterItem.addActionListener(this);
         clearFilterItem.addActionListener(this);
+        // Set shortcuts
+        moreFilterItem.setAccelerator(KeyStroke.getKeyStroke('M',
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        lessFilterItem.setAccelerator(KeyStroke.getKeyStroke('L',
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        rangeFilterItem.setAccelerator(KeyStroke.getKeyStroke('R',
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         // Set font
         moreFilterItem.setFont(font);
         lessFilterItem.setFont(font);
@@ -121,6 +128,15 @@ public class MainFrame extends JFrame implements ActionListener {
         deleteItem.addActionListener(this);
         deleteManyItem.addActionListener(this);
         clearItem.addActionListener(this);
+        // Set shortcuts
+        addItem.setAccelerator(KeyStroke.getKeyStroke('N',
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        editItem.setAccelerator(KeyStroke.getKeyStroke('E',
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        deleteItem.setAccelerator(KeyStroke.getKeyStroke('D',
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        deleteManyItem.setAccelerator(KeyStroke.getKeyStroke('-',
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
         // Set font
         addItem.setFont(font);
         editItem.setFont(font);
@@ -155,8 +171,20 @@ public class MainFrame extends JFrame implements ActionListener {
         setContentPane(rootPanel);
         setTitle("Информация о товарах");
         createMenuBar();
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setPreferredSize(new Dimension(600, 500));
+
+        // call exit() when cross is clicked
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                exit();
+            }
+        });
+
+        // call exit() on ESCAPE
+        rootPanel.registerKeyboardAction(e -> exit(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         productList = new ProductList();
         tableModel = new ProductTableModel(productList);
@@ -504,10 +532,6 @@ public class MainFrame extends JFrame implements ActionListener {
                 table.updateUI();
                 JOptionPane.showMessageDialog(this, "Выбранные товары были удалены.");
             }
-            else
-                JOptionPane.showMessageDialog(this,
-                        "Ни одного товара для удаления не выбрано",
-                        "Информация", JOptionPane.INFORMATION_MESSAGE);
         }
         else
             JOptionPane.showMessageDialog(this, "Список товаров пуст.");
