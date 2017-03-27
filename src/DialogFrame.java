@@ -1,34 +1,52 @@
 import task.Product;
 
 import javax.swing.*;
-import java.awt.*;
+import javax.swing.text.DefaultFormatterFactory;
+import javax.swing.text.NumberFormatter;
 import java.awt.event.*;
+import java.text.NumberFormat;
+import java.util.Objects;
 
-public class DialogFrame extends JDialog implements KeyListener {
+public class DialogFrame extends JDialog {
+    // Default widgets
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
-    private JTextField textFieldId;
+
+    // Components for user's input
+    private JFormattedTextField ftfId;
     private JTextField textFieldName;
-    private JTextField textFieldPrice;
-    private JTextField textFieldCount;
+    private JFormattedTextField ftfPrice;
+    private JFormattedTextField ftfCount;
     private JTextField textFieldDescription;
-    private JLabel lblError;
+
+    // Product which this dialog returns as a result
     private Product product;
 
-    public DialogFrame(String title, Product productForEdit) {
-        lblError.setText("");
+    DialogFrame(String title, Product productForEdit) {
         setContentPane(contentPane);
         setModal(true);
         setTitle(title);
         getRootPane().setDefaultButton(buttonOK);
-        setPreferredSize(new Dimension(400, 300));
 
+        NumberFormat integerFormat = NumberFormat.getIntegerInstance();
+        NumberFormatter numberFormatter = new NumberFormatter(integerFormat);
+        numberFormatter.setValueClass(Integer.class);
+        numberFormatter.setMinimum(1);
+        numberFormatter.setMaximum(Integer.MAX_VALUE);
+        numberFormatter.setAllowsInvalid(false);
+
+        DefaultFormatterFactory formatter = new DefaultFormatterFactory(numberFormatter);
+        ftfId.setFormatterFactory(formatter);
+        ftfPrice.setFormatterFactory(formatter);
+        ftfCount.setFormatterFactory(formatter);
+
+        // Pre-filling product's fields if this dialog is using for edit
         if (productForEdit != null) {
-            textFieldId.setText(Integer.toString(productForEdit.getId()));
+            ftfId.setText(Integer.toString(productForEdit.getId()));
             textFieldName.setText(productForEdit.getName());
-            textFieldPrice.setText(Integer.toString(productForEdit.getPrice()));
-            textFieldCount.setText(Integer.toString(productForEdit.getQuantity()));
+            ftfPrice.setText(Integer.toString(productForEdit.getPrice()));
+            ftfCount.setText(Integer.toString(productForEdit.getQuantity()));
             textFieldDescription.setText(productForEdit.getDescription());
         }
 
@@ -49,60 +67,38 @@ public class DialogFrame extends JDialog implements KeyListener {
                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        textFieldId.addKeyListener(this);
-        textFieldName.addKeyListener(this);
-        textFieldPrice.addKeyListener(this);
-        textFieldCount.addKeyListener(this);
-        textFieldDescription.addKeyListener(this);
-
         pack();
     }
 
-    public Product getProduct() {
-        return product;
-    }
-
     private void onOK() {
-        if (textFieldId.getText() != "" && textFieldName.getText() != ""
-                && textFieldCount.getText() != "" && textFieldPrice.getText() != "") {
-            try {
-                int id = Integer.parseInt(textFieldId.getText());
-                int price = Integer.parseInt(textFieldPrice.getText());
-                int count = Integer.parseInt(textFieldCount.getText());
+        String idStr = ftfId.getText();
+        String name = textFieldName.getText();
+        String countStr = ftfCount.getText();
+        String priceStr = ftfPrice.getText();
 
-                if (id > 0 && price > 0 && count > 0 ) {
-                    product = new Product(id, textFieldName.getText(), price, count, textFieldDescription.getText());
-                    dispose();
-                }
-                else
-                    lblError.setText("Введены неверные значения!");
+        if (!Objects.equals(idStr, "") && !Objects.equals(name, "")
+                && !Objects.equals(countStr, "") && !Objects.equals(priceStr, "")) {
+            try {
+                int id = Integer.parseInt(idStr);
+                int price = Integer.parseInt(priceStr);
+                int count = Integer.parseInt(countStr);
+                
+                product = new Product(id, name, price, count, textFieldDescription.getText());
+                dispose();
 
             } catch (NumberFormatException e) {
-                lblError.setText("Введены неверные значения!");
+                JOptionPane.showMessageDialog(this, "Введены неверные значения!");
             }
         }
         else
-            lblError.setText("Заполните все поля!");
+            JOptionPane.showMessageDialog(this, "Заполните все поля!");
     }
 
     private void onCancel() {
         dispose();
     }
 
-    //region KeyListener methods
-    @Override
-    public void keyTyped(KeyEvent keyEvent) {
-        lblError.setText("");
+    Product getProduct() {
+        return product;
     }
-
-    @Override
-    public void keyPressed(KeyEvent keyEvent) {
-
-    }
-
-    @Override
-    public void keyReleased(KeyEvent keyEvent) {
-
-    }
-    //endregion
 }
