@@ -13,7 +13,6 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private JPanel rootPanel;
     private JTable table;
-    private JMenuItem dbItem;
     private Font font;
     private JPopupMenu popupMenu;
 
@@ -43,13 +42,12 @@ public class MainFrame extends JFrame implements ActionListener {
         JMenu openMenu = new JMenu("Open");
         openMenu.setFont(font);
         // Open from text file
-        JMenuItem txtFileItem = new JMenuItem("From text file");
-        txtFileItem.setAccelerator(KeyStroke.getKeyStroke('O',
-                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        JMenuItem txtFileItem = new JMenuItem(StaticMembers.txtOpenTextFile);
         txtFileItem.setFont(font);
         txtFileItem.addActionListener(this);
+        StaticMembers.setShortcut(txtFileItem, 'O');
         // Open from database
-        dbItem = new JMenuItem("From database");
+        JMenuItem dbItem = new JMenuItem(StaticMembers.txtOpenFromDatabase);
         dbItem.setFont(font);
         dbItem.addActionListener(this);
 
@@ -59,13 +57,12 @@ public class MainFrame extends JFrame implements ActionListener {
         JMenu saveMenu = new JMenu("Save");
         saveMenu.setFont(font);
         // Save as text file
-        JMenuItem saveToTxtItem = new JMenuItem("To text file");
-        saveToTxtItem.setAccelerator(KeyStroke.getKeyStroke('S',
-                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        JMenuItem saveToTxtItem = new JMenuItem(StaticMembers.txtSaveToTextFile);
         saveToTxtItem.setFont(font);
         saveToTxtItem.addActionListener(this);
+        StaticMembers.setShortcut(saveToTxtItem, 'S');
         // Save as database
-        JMenuItem saveToDbItem = new JMenuItem("To database");
+        JMenuItem saveToDbItem = new JMenuItem(StaticMembers.txtSaveToDatabase);
         saveToDbItem.setFont(font);
         saveToDbItem.addActionListener(this);
 
@@ -73,8 +70,7 @@ public class MainFrame extends JFrame implements ActionListener {
         saveMenu.add(saveToDbItem);
 
         // Exit item
-        JMenuItem exitItem = new JMenuItem("Exit");
-        exitItem.setMnemonic(KeyEvent.VK_ESCAPE);
+        JMenuItem exitItem = new JMenuItem(StaticMembers.txtExit);
         exitItem.addActionListener(this);
         exitItem.setFont(font);
 
@@ -87,22 +83,19 @@ public class MainFrame extends JFrame implements ActionListener {
         JMenu filterMenu = new JMenu("Filter");
         filterMenu.setFont(font);
         // Items of filter menu
-        JMenuItem moreFilterItem = new JMenuItem("Price more than value");
-        JMenuItem lessFilterItem = new JMenuItem("Price less than value");
-        JMenuItem rangeFilterItem = new JMenuItem("Set price range");
-        JMenuItem clearFilterItem = new JMenuItem("Clear filter");
+        JMenuItem moreFilterItem = new JMenuItem(StaticMembers.txtPriceMoreFilter);
+        JMenuItem lessFilterItem = new JMenuItem(StaticMembers.txtPriceLessFilter);
+        JMenuItem rangeFilterItem = new JMenuItem(StaticMembers.txtPriceRangeFilter);
+        JMenuItem clearFilterItem = new JMenuItem(StaticMembers.txtClearFilter);
         // Set action listener
         moreFilterItem.addActionListener(this);
         lessFilterItem.addActionListener(this);
         rangeFilterItem.addActionListener(this);
         clearFilterItem.addActionListener(this);
         // Set shortcuts
-        moreFilterItem.setAccelerator(KeyStroke.getKeyStroke('M',
-                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        lessFilterItem.setAccelerator(KeyStroke.getKeyStroke('L',
-                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        rangeFilterItem.setAccelerator(KeyStroke.getKeyStroke('R',
-                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        StaticMembers.setShortcut(moreFilterItem, 'M');
+        StaticMembers.setShortcut(lessFilterItem, 'L');
+        StaticMembers.setShortcut(rangeFilterItem, 'R');
         // Set font
         moreFilterItem.setFont(font);
         lessFilterItem.setFont(font);
@@ -117,11 +110,11 @@ public class MainFrame extends JFrame implements ActionListener {
         viewMenu.add(filterMenu);
 
         // Configure edit menu
-        JMenuItem addItem = new JMenuItem("Add");
-        JMenuItem editItem = new JMenuItem("Edit");
-        JMenuItem deleteItem = new JMenuItem("Delete");
-        JMenuItem deleteManyItem = new JMenuItem("Delete many");
-        JMenuItem clearItem = new JMenuItem("Clear");
+        JMenuItem addItem = new JMenuItem(StaticMembers.txtAdd);
+        JMenuItem editItem = new JMenuItem(StaticMembers.txtEdit);
+        JMenuItem deleteItem = new JMenuItem(StaticMembers.txtDelete);
+        JMenuItem deleteManyItem = new JMenuItem(StaticMembers.txtDeleteMany);
+        JMenuItem clearItem = new JMenuItem(StaticMembers.txtClear);
         // Set action listener
         addItem.addActionListener(this);
         editItem.addActionListener(this);
@@ -129,14 +122,10 @@ public class MainFrame extends JFrame implements ActionListener {
         deleteManyItem.addActionListener(this);
         clearItem.addActionListener(this);
         // Set shortcuts
-        addItem.setAccelerator(KeyStroke.getKeyStroke('N',
-                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        editItem.setAccelerator(KeyStroke.getKeyStroke('E',
-                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        deleteItem.setAccelerator(KeyStroke.getKeyStroke('D',
-                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-        deleteManyItem.setAccelerator(KeyStroke.getKeyStroke('-',
-                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+        StaticMembers.setShortcut(addItem, 'N');
+        StaticMembers.setShortcut(editItem, 'E');
+        StaticMembers.setShortcut(deleteItem, 'D');
+        StaticMembers.setShortcut(deleteManyItem, '-');
         // Set font
         addItem.setFont(font);
         editItem.setFont(font);
@@ -156,10 +145,10 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private void createPopupMenu() {
         popupMenu = new JPopupMenu();
-        JMenuItem popupEditItem = new JMenuItem("Edit product");
+        JMenuItem popupEditItem = new JMenuItem(StaticMembers.txtEditPopup);
         popupEditItem.setFont(font);
         popupEditItem.addActionListener(this);
-        JMenuItem popupDeleteItem = new JMenuItem("Delete product");
+        JMenuItem popupDeleteItem = new JMenuItem(StaticMembers.txtDeletePopup);
         popupDeleteItem.setFont(font);
         popupDeleteItem.addActionListener(this);
 
@@ -226,63 +215,72 @@ public class MainFrame extends JFrame implements ActionListener {
         EventQueue.invokeLater(MainFrame::new);
     }
 
+    private void showMessage(String message) {
+        JOptionPane.showMessageDialog(this, message);
+    }
+
+    private void showErrorMessage(String message) {
+        JOptionPane.showMessageDialog(this, message,
+                "Ошибка", JOptionPane.WARNING_MESSAGE);
+    }
+
     // User selection of menu item
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
         switch (actionEvent.getActionCommand()) {
             // File menu
-            case "From text file":
+            case StaticMembers.txtOpenTextFile:
                 openFromTextFile();
                 break;
-            case "From database":
+            case StaticMembers.txtOpenFromDatabase:
                 openFromDatabase();
                 break;
-            case "To text file":
+            case StaticMembers.txtSaveToTextFile:
                 saveToTextFile();
                 break;
-            case "To database":
+            case StaticMembers.txtSaveToDatabase:
                 saveToDatabase();
                 break;
-            case "Exit":
+            case StaticMembers.txtExit:
                 exit();
                 break;
             // View menu
-            case "Price more than value":
+            case StaticMembers.txtPriceMoreFilter:
                 priceMoreFilter();
                 break;
-            case "Price less than value":
+            case StaticMembers.txtPriceLessFilter:
                 priceLessFilter();
                 break;
-            case "Set price range":
+            case StaticMembers.txtPriceRangeFilter:
                 priceRangeFilter();
                 break;
-            case "Clear filter":
+            case StaticMembers.txtClearFilter:
                 clearFilter();
                 break;
             // Edit menu
-            case "Add":
+            case StaticMembers.txtAdd:
                 add();
                 break;
-            case "Edit":
+            case StaticMembers.txtEdit:
                 edit();
                 break;
-            case "Delete":
+            case StaticMembers.txtDelete:
                 delete();
                 break;
-            case "Delete many":
+            case StaticMembers.txtDeleteMany:
                 deleteMany();
                 break;
-            case "Clear":
+            case StaticMembers.txtClear:
                 clear();
                 break;
             // Popup menu
-            case "Edit product":
+            case StaticMembers.txtEditPopup:
                 edit(selectedId, productList.getById(selectedId));
                 break;
-            case "Delete product":
+            case StaticMembers.txtDeletePopup:
                 productList.delete(selectedId);
                 table.updateUI();
-                JOptionPane.showMessageDialog(this, "Товар был удален.");
+                showMessage("Товар был удален");
                 break;
             default:
                 break;
@@ -302,12 +300,10 @@ public class MainFrame extends JFrame implements ActionListener {
             if (productList.loadFromFile(file.getName())) {
                 table.setAutoCreateRowSorter(true);
                 table.updateUI();
-                JOptionPane.showMessageDialog(this, "Данные из файла были загружены.");
+                showMessage("Данные из файла были загружены.");
             }
             else
-                JOptionPane.showMessageDialog(this,
-                        "Файл содержит неверные данные.",
-                        "Ошибка", JOptionPane.WARNING_MESSAGE);
+                showErrorMessage("Файл содержит неверные данные.");
         }
     }
 
@@ -315,7 +311,7 @@ public class MainFrame extends JFrame implements ActionListener {
         if (productList.loadFromDatabase()) {
             table.setAutoCreateRowSorter(true);
             table.updateUI();
-            JOptionPane.showMessageDialog(this, "Данные из базы данных были загружены.");
+            showMessage("Данные из базы данных были загружены");
         }
     }
 
@@ -326,14 +322,13 @@ public class MainFrame extends JFrame implements ActionListener {
         if (res == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
             productList.saveToFile(file.getName());
-            JOptionPane.showMessageDialog(this, "Данные были сохранены в файл.");
+            showMessage("Данные были сохранены в текстовый файл.");
         }
     }
 
     private void saveToDatabase() {
         productList.saveToDatabase();
-        JOptionPane.showMessageDialog(this, "Данные были сохранены в базу данных.");
-        dbItem.setEnabled(true);
+        showMessage("Данные были сохранены в базу данных.");
     }
 
     private void exit() {
@@ -357,21 +352,18 @@ public class MainFrame extends JFrame implements ActionListener {
                     filterResult = productList.filter(p -> p >= price);
                     if (filterResult.size() > 0) {
                         table.setModel(new ProductTableModel(filterResult));
-                        JOptionPane.showMessageDialog(this, "Фильтр применен.");
+                        showMessage("Фильтр применен.");
                     }
                     else
-                        JOptionPane.showMessageDialog(this, "Ни один товар не удовлетворяет заданному фильтру.");
+                        showMessage("Ни один товар не удовлетворяет заданному фильтру.");
 
                 } catch (NumberFormatException e) {
-                    JOptionPane.showMessageDialog(this,
-                            "Введено неверное значение цены.",
-                            "Ошибка",
-                            JOptionPane.ERROR_MESSAGE);
+                    showErrorMessage("Введено неверное значение цены.");
                 }
             }
         }
         else
-            JOptionPane.showMessageDialog(this, "Список товаров пуст.");
+            showMessage("Список товаров пуст.");
     }
 
     private void priceLessFilter() {
@@ -385,21 +377,18 @@ public class MainFrame extends JFrame implements ActionListener {
                     filterResult = productList.filter(p -> p <= price);
                     if (filterResult.size() > 0) {
                         table.setModel(new ProductTableModel(filterResult));
-                        JOptionPane.showMessageDialog(this, "Фильтр применен.");
+                        showMessage("Фильтр применен.");
                     }
                     else
-                        JOptionPane.showMessageDialog(this, "Ни один товар не удовлетворяет заданному фильтру.");
+                        showMessage("Ни один товар не удовлетворяет заданному фильтру.");
 
                 } catch (NumberFormatException e) {
-                    JOptionPane.showMessageDialog(this,
-                            "Введено неверное значение цены.",
-                            "Ошибка",
-                            JOptionPane.ERROR_MESSAGE);
+                    showErrorMessage("Введено неверное значение цены.");
                 }
             }
         }
         else
-            JOptionPane.showMessageDialog(this, "Список товаров пуст.");
+            showMessage("Список товаров пуст.");
     }
 
     private void priceRangeFilter() {
@@ -412,14 +401,14 @@ public class MainFrame extends JFrame implements ActionListener {
                 filterResult = productList.filter(price -> price >= minPrice && price <= maxPrice);
                 if (filterResult.size() > 0) {
                     table.setModel(new ProductTableModel(filterResult));
-                    JOptionPane.showMessageDialog(this, "Фильтр применен.");
+                    showMessage("Фильтр применен.");
                 }
                 else
-                    JOptionPane.showMessageDialog(this, "Ни один товар не удовлетворяет заданному фильтру.");
+                    showMessage("Ни один товар не удовлетворяет заданному фильтру.");
             }
         }
         else
-            JOptionPane.showMessageDialog(this, "Список товаров пуст.");
+            showMessage("Список товаров пуст.");
     }
 
     private void clearFilter() {
@@ -435,12 +424,10 @@ public class MainFrame extends JFrame implements ActionListener {
             if (productList.add(product)) {
                 table.setAutoCreateRowSorter(true);
                 table.updateUI();
-                JOptionPane.showMessageDialog(this, "Товар был добавлен.");
+                showMessage("Товар был добавлен");
             }
             else
-                JOptionPane.showMessageDialog(this,
-                        "Товар с данным ID уже существует.",
-                        "Ошибка", JOptionPane.WARNING_MESSAGE);
+                showErrorMessage("Товар с данным ID уже существует.");
         }
     }
 
@@ -454,22 +441,17 @@ public class MainFrame extends JFrame implements ActionListener {
                     int id = Integer.parseInt(result);
                     Product productForEdit = productList.getById(id);
                     if (productForEdit == null)
-                        JOptionPane.showMessageDialog(this,
-                                "Товар с данным ID не найден.",
-                                "Ошибка", JOptionPane.WARNING_MESSAGE);
+                        showErrorMessage("Товар с данным ID не найден.");
                     else
                         edit(id, productForEdit);
 
                 } catch (NumberFormatException e) {
-                    JOptionPane.showMessageDialog(this,
-                            "Введено неверное значение ID.",
-                            "Ошибка",
-                            JOptionPane.ERROR_MESSAGE);
+                    showErrorMessage("Введено неверное значение ID.");
                 }
             }
         }
         else
-            JOptionPane.showMessageDialog(this, "Список товаров пуст.");
+            showMessage("Список товаров пуст.");
     }
 
     private void edit(int id, Product productForEdit) {
@@ -480,13 +462,11 @@ public class MainFrame extends JFrame implements ActionListener {
         if (newProduct != null) {
             if (productList.edit(id, newProduct)) {
                 table.updateUI();
-                JOptionPane.showMessageDialog(this, "Товар был отредактирован.");
+                showMessage("Товар был отредактирован.");
                 // ID of selected product was changed
                 selectedId = newProduct.getId();
             } else
-                JOptionPane.showMessageDialog(this,
-                        "Товар с данным ID уже существует.",
-                        "Ошибка", JOptionPane.WARNING_MESSAGE);
+                showErrorMessage("Товар с данным ID уже существует.");
         }
     }
 
@@ -499,24 +479,19 @@ public class MainFrame extends JFrame implements ActionListener {
                 try {
                     int id = Integer.parseInt(result);
                     if (!productList.delete(id))
-                        JOptionPane.showMessageDialog(this,
-                                "Товар с данным ID не найден.",
-                                "Ошибка", JOptionPane.WARNING_MESSAGE);
+                        showErrorMessage("Товар с данным ID не найден.");
                     else {
                         table.setAutoCreateRowSorter(true);
                         table.updateUI();
-                        JOptionPane.showMessageDialog(this, "Товар был удален.");
+                        showMessage("Товар был удален.");
                     }
                 } catch (NumberFormatException e) {
-                    JOptionPane.showMessageDialog(this,
-                            "Введено неверное значение ID.",
-                            "Ошибка",
-                            JOptionPane.ERROR_MESSAGE);
+                    showErrorMessage("Введено неверное значение ID.");
                 }
             }
         }
         else
-            JOptionPane.showMessageDialog(this, "Список товаров пуст.");
+            showMessage("Список товаров пуст.");
     }
 
     private void deleteMany() {
@@ -530,11 +505,11 @@ public class MainFrame extends JFrame implements ActionListener {
                 }
                 table.setAutoCreateRowSorter(true);
                 table.updateUI();
-                JOptionPane.showMessageDialog(this, "Выбранные товары были удалены.");
+                showMessage("Выбранные товары были удалены.");
             }
         }
         else
-            JOptionPane.showMessageDialog(this, "Список товаров пуст.");
+            showMessage("Список товаров пуст.");
     }
 
     private void clear() {
@@ -544,11 +519,11 @@ public class MainFrame extends JFrame implements ActionListener {
             if (dialogResult == JOptionPane.YES_OPTION) {
                 productList.clear();
                 table.updateUI();
-                JOptionPane.showMessageDialog(this, "Товары были удалены.");
+                showMessage("Товары были удалены.");
             }
         }
         else
-            JOptionPane.showMessageDialog(this, "Список товаров пуст.");
+            showMessage("Список товаров пуст.");
     }
     //endregion
 }
