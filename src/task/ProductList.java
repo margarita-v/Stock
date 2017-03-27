@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class ProductList {
 
@@ -22,9 +23,13 @@ public class ProductList {
         return products.size();
     }
 
-    public ProductList filter() {
-        ProductList result = this;
-        return this;
+    public ProductList filter(Predicate<Integer> condition) {
+        ProductList result = new ProductList();
+        for (Product product: products) {
+            if (condition.test(product.getPrice()))
+                result.add(product);
+        }
+        return result;
     }
 
     //region Helpful functions

@@ -18,7 +18,10 @@ public class MainFrame extends JFrame implements ActionListener {
     private JPopupMenu popupMenu;
 
     private ProductList productList;
+    private ProductList filterResult;
     private int selectedId;
+
+    private ProductTableModel tableModel;
 
     private void createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
@@ -156,7 +159,7 @@ public class MainFrame extends JFrame implements ActionListener {
         setPreferredSize(new Dimension(600, 500));
 
         productList = new ProductList();
-        ProductTableModel tableModel = new ProductTableModel(productList);
+        tableModel = new ProductTableModel(productList);
         table = new JTable(tableModel);
         getContentPane().add(new JScrollPane(table));
 
@@ -219,7 +222,7 @@ public class MainFrame extends JFrame implements ActionListener {
             case "Price more than value":
                 priceMoreFilter();
                 break;
-            case "Price less than filter":
+            case "Price less than value":
                 priceLessFilter();
                 break;
             case "Set price range":
@@ -322,6 +325,14 @@ public class MainFrame extends JFrame implements ActionListener {
                     "Фильтр по цене", JOptionPane.DEFAULT_OPTION);
             if (result != null) {
                 try {
+                    int price = Integer.parseInt(result);
+                    filterResult = productList.filter(p -> p >= price);
+                    if (filterResult.size() > 0) {
+                        table.setModel(new ProductTableModel(filterResult));
+                        JOptionPane.showMessageDialog(this, "Фильтр применен.");
+                    }
+                    else
+                        JOptionPane.showMessageDialog(this, "Ни один товар не удовлетворяет заданному фильтру.");
 
                 } catch (NumberFormatException e) {
                     JOptionPane.showMessageDialog(this,
@@ -342,6 +353,14 @@ public class MainFrame extends JFrame implements ActionListener {
                     "Фильтр по цене", JOptionPane.DEFAULT_OPTION);
             if (result != null) {
                 try {
+                    int price = Integer.parseInt(result);
+                    filterResult = productList.filter(p -> p <= price);
+                    if (filterResult.size() > 0) {
+                        table.setModel(new ProductTableModel(filterResult));
+                        JOptionPane.showMessageDialog(this, "Фильтр применен.");
+                    }
+                    else
+                        JOptionPane.showMessageDialog(this, "Ни один товар не удовлетворяет заданному фильтру.");
 
                 } catch (NumberFormatException e) {
                     JOptionPane.showMessageDialog(this,
@@ -356,11 +375,27 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     private void priceRangeFilter() {
+        if (productList.size() > 0) {
+            PriceFilterFrame dialog = new PriceFilterFrame("Введите ценовой диапазон");
+            dialog.setVisible(true);
 
+            int minPrice = dialog.getMinPrice(), maxPrice = dialog.getMaxPrice();
+            if (minPrice > 0 && maxPrice > 0) {
+                filterResult = productList.filter(price -> price >= minPrice && price <= maxPrice);
+                if (filterResult.size() > 0) {
+                    table.setModel(new ProductTableModel(filterResult));
+                    JOptionPane.showMessageDialog(this, "Фильтр применен.");
+                }
+                else
+                    JOptionPane.showMessageDialog(this, "Ни один товар не удовлетворяет заданному фильтру.");
+            }
+        }
+        else
+            JOptionPane.showMessageDialog(this, "Список товаров пуст.");
     }
 
     private void clearFilter() {
-
+        table.setModel(tableModel);
     }
 
     // Edit menu

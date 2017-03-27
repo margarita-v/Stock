@@ -82,16 +82,20 @@ public class DialogFrame extends JDialog {
                 int id = Integer.parseInt(idStr);
                 int price = Integer.parseInt(priceStr);
                 int count = Integer.parseInt(countStr);
-                
+
                 product = new Product(id, name, price, count, textFieldDescription.getText());
                 dispose();
 
             } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "Введены неверные значения!");
+                JOptionPane.showMessageDialog(this,
+                        "Введены неверные значения!",
+                        "Ошибка", JOptionPane.WARNING_MESSAGE);
             }
         }
         else
-            JOptionPane.showMessageDialog(this, "Заполните все поля!");
+            JOptionPane.showMessageDialog(this,
+                    "Заполните все поля!",
+                    "Ошибка", JOptionPane.WARNING_MESSAGE);
     }
 
     private void onCancel() {
