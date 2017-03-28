@@ -27,6 +27,7 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private ProductTableModel tableModel;
     private NumberFormatter numberFormatter;
+    private JFileChooser fileChooser;
 
     private void createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
@@ -158,6 +159,12 @@ public class MainFrame extends JFrame implements ActionListener {
         numberFormatter.setMaximum(Integer.MAX_VALUE);
         numberFormatter.setAllowsInvalid(false);
 
+        // Create file chooser for open and save text files
+        File workingDirectory = new File(System.getProperty("user.dir"));
+        fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(workingDirectory);
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Text files", "txt"));
+
         createMenuBar();
 
         // call exit() when cross is clicked
@@ -280,10 +287,6 @@ public class MainFrame extends JFrame implements ActionListener {
     //region Menu management
     // File menu
     private void openFromTextFile() {
-        File workingDirectory = new File(System.getProperty("user.dir"));
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setCurrentDirectory(workingDirectory);
-        fileChooser.setFileFilter(new FileNameExtensionFilter("Text files", "txt"));
         int res = fileChooser.showOpenDialog(null);
         if (res == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
@@ -306,8 +309,6 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     private void saveToTextFile() {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setFileFilter(new FileNameExtensionFilter("Text files", "txt"));
         int res = fileChooser.showSaveDialog(null);
         if (res == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
@@ -331,15 +332,18 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     // View menu
-    private void priceMoreFilter() {
+    private void simpleFilter(String message, Boolean priceMoreFilter) {
         if (productList.size() > 0) {
-            String result = JOptionPane.showInputDialog(this,
-                    "Введите минимальное значение цены.",
+            String result = JOptionPane.showInputDialog(this, message,
                     "Фильтр по цене", JOptionPane.DEFAULT_OPTION);
             if (result != null) {
                 try {
                     int price = Integer.parseInt(result);
-                    filterResult = productList.filter(p -> p >= price);
+                    if (priceMoreFilter)
+                        filterResult = productList.filter(p -> p >= price);
+                    else
+                        filterResult = productList.filter(p -> p <= price);
+
                     if (filterResult.size() > 0) {
                         table.setModel(new ProductTableModel(filterResult));
                         showMessage("Фильтр применен.");
@@ -356,29 +360,12 @@ public class MainFrame extends JFrame implements ActionListener {
             showMessage("Список товаров пуст.");
     }
 
-    private void priceLessFilter() {
-        if (productList.size() > 0) {
-            String result = JOptionPane.showInputDialog(this,
-                    "Введите максимальное значение цены.",
-                    "Фильтр по цене", JOptionPane.DEFAULT_OPTION);
-            if (result != null) {
-                try {
-                    int price = Integer.parseInt(result);
-                    filterResult = productList.filter(p -> p <= price);
-                    if (filterResult.size() > 0) {
-                        table.setModel(new ProductTableModel(filterResult));
-                        showMessage("Фильтр применен.");
-                    }
-                    else
-                        showMessage("Ни один товар не удовлетворяет заданному фильтру.");
+    private void priceMoreFilter() {
+        simpleFilter("Введите минимальное значение цены.", true);
+    }
 
-                } catch (NumberFormatException e) {
-                    showErrorMessage("Введено неверное значение цены.");
-                }
-            }
-        }
-        else
-            showMessage("Список товаров пуст.");
+    private void priceLessFilter() {
+        simpleFilter("Введите максимальное значение цены.", false);
     }
 
     private void priceRangeFilter() {
