@@ -1,3 +1,5 @@
+package dialogs;
+
 import task.Product;
 
 import javax.swing.*;
@@ -23,7 +25,7 @@ public class DialogFrame extends JDialog {
     // Product which this dialog returns as a result
     private Product product;
 
-    DialogFrame(String title, Product productForEdit) {
+    public DialogFrame(String title, Product productForEdit) {
         setContentPane(contentPane);
         setModal(true);
         setTitle(title);
@@ -102,7 +104,7 @@ public class DialogFrame extends JDialog {
         dispose();
     }
 
-    Product getProduct() {
+    public Product getProduct() {
         return product;
     }
 }

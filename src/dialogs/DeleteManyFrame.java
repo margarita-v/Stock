@@ -1,3 +1,5 @@
+package dialogs;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -15,11 +17,10 @@ public class DeleteManyFrame extends JDialog {
     // IDs of products which were chosen
     private List<Integer> chosenItems;
 
-    DeleteManyFrame(List<Integer> productsIDs) {
+    public DeleteManyFrame(List<Integer> productsIDs) {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
-        setPreferredSize(new Dimension(400, 300));
 
         chosenItems = new ArrayList<>();
         List<JCheckBox> cbList = new ArrayList<>();
@@ -68,7 +69,7 @@ public class DeleteManyFrame extends JDialog {
         dispose();
     }
 
-    List<Integer> getChosenIDs() {
+    public List<Integer> getChosenIDs() {
         return chosenItems;
     }
 }

@@ -1,3 +1,5 @@
+package dialogs;
+
 import javax.swing.*;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
@@ -19,12 +21,11 @@ public class PriceFilterFrame extends JDialog {
     // Price range which this dialog returns as a result
     private int minPrice, maxPrice;
 
-    PriceFilterFrame(String title) {
+    public PriceFilterFrame(String title) {
         setContentPane(contentPane);
         setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
-        setPreferredSize(new Dimension(320, 125));
         setTitle(title);
+        getRootPane().setDefaultButton(buttonOK);
 
         NumberFormat integerFormat = NumberFormat.getIntegerInstance();
         NumberFormatter numberFormatter = new NumberFormatter(integerFormat);
@@ -53,6 +54,8 @@ public class PriceFilterFrame extends JDialog {
         contentPane.registerKeyboardAction(e -> onCancel(),
                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        pack();
     }
 
     private void onOK() {
@@ -88,11 +91,11 @@ public class PriceFilterFrame extends JDialog {
         dispose();
     }
 
-    int getMinPrice() {
+    public int getMinPrice() {
         return minPrice;
     }
 
-    int getMaxPrice() {
+    public int getMaxPrice() {
         return maxPrice;
     }
 }

@@ -1,3 +1,6 @@
+import dialogs.DeleteManyFrame;
+import dialogs.DialogFrame;
+import dialogs.PriceFilterFrame;
 import task.Product;
 import task.ProductList;
 
@@ -363,7 +366,6 @@ public class MainFrame extends JFrame implements ActionListener {
         if (productList.size() > 0) {
             PriceFilterFrame dialog = new PriceFilterFrame("Введите ценовой диапазон");
             dialog.setVisible(true);
-
             int minPrice = dialog.getMinPrice(), maxPrice = dialog.getMaxPrice();
             if (minPrice > 0 && maxPrice > 0) {
                 filterResult = productList.filter(price -> price >= minPrice && price <= maxPrice);
