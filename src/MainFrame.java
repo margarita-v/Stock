@@ -13,7 +13,6 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private JPanel rootPanel;
     private JTable table;
-    private Font font;
     private JPopupMenu popupMenu;
 
     private ProductList productList;
@@ -24,15 +23,11 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private void createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
-        font = new Font("Arial", Font.PLAIN, 12);
 
         // Main items of menu bar
         JMenu fileMenu = new JMenu("File");
-        fileMenu.setFont(font);
         JMenu viewMenu = new JMenu("View");
-        viewMenu.setFont(font);
         JMenu editMenu = new JMenu("Edit");
-        editMenu.setFont(font);
 
         menuBar.add(fileMenu);
         menuBar.add(viewMenu);
@@ -40,39 +35,28 @@ public class MainFrame extends JFrame implements ActionListener {
 
         // Configure file menu
         JMenu openMenu = new JMenu("Open");
-        openMenu.setFont(font);
-        // Open from text file
-        JMenuItem txtFileItem = new JMenuItem(StaticMembers.txtOpenTextFile);
-        txtFileItem.setFont(font);
+        JMenuItem txtFileItem = new JMenuItem(txtOpenTextFile);
+        JMenuItem dbItem = new JMenuItem(txtOpenFromDatabase);
+        setShortcut(txtFileItem, 'O');
         txtFileItem.addActionListener(this);
-        StaticMembers.setShortcut(txtFileItem, 'O');
-        // Open from database
-        JMenuItem dbItem = new JMenuItem(StaticMembers.txtOpenFromDatabase);
-        dbItem.setFont(font);
         dbItem.addActionListener(this);
 
         openMenu.add(txtFileItem);
         openMenu.add(dbItem);
 
         JMenu saveMenu = new JMenu("Save");
-        saveMenu.setFont(font);
-        // Save as text file
-        JMenuItem saveToTxtItem = new JMenuItem(StaticMembers.txtSaveToTextFile);
-        saveToTxtItem.setFont(font);
+        JMenuItem saveToTxtItem = new JMenuItem(txtSaveToTextFile);
+        JMenuItem saveToDbItem = new JMenuItem(txtSaveToDatabase);
+        setShortcut(saveToTxtItem, 'S');
         saveToTxtItem.addActionListener(this);
-        StaticMembers.setShortcut(saveToTxtItem, 'S');
-        // Save as database
-        JMenuItem saveToDbItem = new JMenuItem(StaticMembers.txtSaveToDatabase);
-        saveToDbItem.setFont(font);
         saveToDbItem.addActionListener(this);
 
         saveMenu.add(saveToTxtItem);
         saveMenu.add(saveToDbItem);
 
         // Exit item
-        JMenuItem exitItem = new JMenuItem(StaticMembers.txtExit);
+        JMenuItem exitItem = new JMenuItem(txtExit);
         exitItem.addActionListener(this);
-        exitItem.setFont(font);
 
         fileMenu.add(openMenu);
         fileMenu.add(saveMenu);
@@ -81,26 +65,20 @@ public class MainFrame extends JFrame implements ActionListener {
 
         // Configure view menu
         JMenu filterMenu = new JMenu("Filter");
-        filterMenu.setFont(font);
         // Items of filter menu
-        JMenuItem moreFilterItem = new JMenuItem(StaticMembers.txtPriceMoreFilter);
-        JMenuItem lessFilterItem = new JMenuItem(StaticMembers.txtPriceLessFilter);
-        JMenuItem rangeFilterItem = new JMenuItem(StaticMembers.txtPriceRangeFilter);
-        JMenuItem clearFilterItem = new JMenuItem(StaticMembers.txtClearFilter);
+        JMenuItem moreFilterItem = new JMenuItem(txtPriceMoreFilter);
+        JMenuItem lessFilterItem = new JMenuItem(txtPriceLessFilter);
+        JMenuItem rangeFilterItem = new JMenuItem(txtPriceRangeFilter);
+        JMenuItem clearFilterItem = new JMenuItem(txtClearFilter);
         // Set action listener
         moreFilterItem.addActionListener(this);
         lessFilterItem.addActionListener(this);
         rangeFilterItem.addActionListener(this);
         clearFilterItem.addActionListener(this);
         // Set shortcuts
-        StaticMembers.setShortcut(moreFilterItem, 'M');
-        StaticMembers.setShortcut(lessFilterItem, 'L');
-        StaticMembers.setShortcut(rangeFilterItem, 'R');
-        // Set font
-        moreFilterItem.setFont(font);
-        lessFilterItem.setFont(font);
-        rangeFilterItem.setFont(font);
-        clearFilterItem.setFont(font);
+        setShortcut(moreFilterItem, 'M');
+        setShortcut(lessFilterItem, 'L');
+        setShortcut(rangeFilterItem, 'R');
 
         filterMenu.add(moreFilterItem);
         filterMenu.add(lessFilterItem);
@@ -110,11 +88,11 @@ public class MainFrame extends JFrame implements ActionListener {
         viewMenu.add(filterMenu);
 
         // Configure edit menu
-        JMenuItem addItem = new JMenuItem(StaticMembers.txtAdd);
-        JMenuItem editItem = new JMenuItem(StaticMembers.txtEdit);
-        JMenuItem deleteItem = new JMenuItem(StaticMembers.txtDelete);
-        JMenuItem deleteManyItem = new JMenuItem(StaticMembers.txtDeleteMany);
-        JMenuItem clearItem = new JMenuItem(StaticMembers.txtClear);
+        JMenuItem addItem = new JMenuItem(txtAdd);
+        JMenuItem editItem = new JMenuItem(txtEdit);
+        JMenuItem deleteItem = new JMenuItem(txtDelete);
+        JMenuItem deleteManyItem = new JMenuItem(txtDeleteMany);
+        JMenuItem clearItem = new JMenuItem(txtClear);
         // Set action listener
         addItem.addActionListener(this);
         editItem.addActionListener(this);
@@ -122,16 +100,10 @@ public class MainFrame extends JFrame implements ActionListener {
         deleteManyItem.addActionListener(this);
         clearItem.addActionListener(this);
         // Set shortcuts
-        StaticMembers.setShortcut(addItem, 'N');
-        StaticMembers.setShortcut(editItem, 'E');
-        StaticMembers.setShortcut(deleteItem, 'D');
-        StaticMembers.setShortcut(deleteManyItem, '-');
-        // Set font
-        addItem.setFont(font);
-        editItem.setFont(font);
-        deleteItem.setFont(font);
-        deleteManyItem.setFont(font);
-        clearItem.setFont(font);
+        setShortcut(addItem, 'N');
+        setShortcut(editItem, 'E');
+        setShortcut(deleteItem, 'D');
+        setShortcut(deleteManyItem, '-');
 
         editMenu.add(addItem);
         editMenu.add(editItem);
@@ -145,11 +117,9 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private void createPopupMenu() {
         popupMenu = new JPopupMenu();
-        JMenuItem popupEditItem = new JMenuItem(StaticMembers.txtEditPopup);
-        popupEditItem.setFont(font);
+        JMenuItem popupEditItem = new JMenuItem(txtEditPopup);
+        JMenuItem popupDeleteItem = new JMenuItem(txtDeletePopup);
         popupEditItem.addActionListener(this);
-        JMenuItem popupDeleteItem = new JMenuItem(StaticMembers.txtDeletePopup);
-        popupDeleteItem.setFont(font);
         popupDeleteItem.addActionListener(this);
 
         popupMenu.add(popupEditItem);
@@ -159,8 +129,14 @@ public class MainFrame extends JFrame implements ActionListener {
     private void createGui() {
         setContentPane(rootPanel);
         setTitle("Информация о товарах");
-        createMenuBar();
         setPreferredSize(new Dimension(600, 500));
+
+        // Set font for all menu and menu items
+        Font font = new Font("Arial", Font.PLAIN, 12);
+        UIManager.put("Menu.font", font);
+        UIManager.put("MenuItem.font", font);
+
+        createMenuBar();
 
         // call exit() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -188,6 +164,7 @@ public class MainFrame extends JFrame implements ActionListener {
         table.setRowSorter(sorter);
         */
 
+        // Render integer values on center
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
         table.setDefaultRenderer(Integer.class, centerRenderer);
@@ -215,69 +192,60 @@ public class MainFrame extends JFrame implements ActionListener {
         EventQueue.invokeLater(MainFrame::new);
     }
 
-    private void showMessage(String message) {
-        JOptionPane.showMessageDialog(this, message);
-    }
-
-    private void showErrorMessage(String message) {
-        JOptionPane.showMessageDialog(this, message,
-                "Ошибка", JOptionPane.WARNING_MESSAGE);
-    }
-
     // User selection of menu item
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
         switch (actionEvent.getActionCommand()) {
             // File menu
-            case StaticMembers.txtOpenTextFile:
+            case txtOpenTextFile:
                 openFromTextFile();
                 break;
-            case StaticMembers.txtOpenFromDatabase:
+            case txtOpenFromDatabase:
                 openFromDatabase();
                 break;
-            case StaticMembers.txtSaveToTextFile:
+            case txtSaveToTextFile:
                 saveToTextFile();
                 break;
-            case StaticMembers.txtSaveToDatabase:
+            case txtSaveToDatabase:
                 saveToDatabase();
                 break;
-            case StaticMembers.txtExit:
+            case txtExit:
                 exit();
                 break;
             // View menu
-            case StaticMembers.txtPriceMoreFilter:
+            case txtPriceMoreFilter:
                 priceMoreFilter();
                 break;
-            case StaticMembers.txtPriceLessFilter:
+            case txtPriceLessFilter:
                 priceLessFilter();
                 break;
-            case StaticMembers.txtPriceRangeFilter:
+            case txtPriceRangeFilter:
                 priceRangeFilter();
                 break;
-            case StaticMembers.txtClearFilter:
+            case txtClearFilter:
                 clearFilter();
                 break;
             // Edit menu
-            case StaticMembers.txtAdd:
+            case txtAdd:
                 add();
                 break;
-            case StaticMembers.txtEdit:
+            case txtEdit:
                 edit();
                 break;
-            case StaticMembers.txtDelete:
+            case txtDelete:
                 delete();
                 break;
-            case StaticMembers.txtDeleteMany:
+            case txtDeleteMany:
                 deleteMany();
                 break;
-            case StaticMembers.txtClear:
+            case txtClear:
                 clear();
                 break;
             // Popup menu
-            case StaticMembers.txtEditPopup:
+            case txtEditPopup:
                 edit(selectedId, productList.getById(selectedId));
                 break;
-            case StaticMembers.txtDeletePopup:
+            case txtDeletePopup:
                 productList.delete(selectedId);
                 table.updateUI();
                 showMessage("Товар был удален");
@@ -525,6 +493,44 @@ public class MainFrame extends JFrame implements ActionListener {
         else
             showMessage("Список товаров пуст.");
     }
+    //endregion
+
+    //region Helpful functions
+    private void showMessage(String message) {
+        JOptionPane.showMessageDialog(this, message);
+    }
+
+    private void showErrorMessage(String message) {
+        JOptionPane.showMessageDialog(this, message,
+                "Ошибка", JOptionPane.WARNING_MESSAGE);
+    }
+
+    private static void setShortcut(JMenuItem menuItem, char symbol) {
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(symbol,
+                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+    }
+    //endregion
+
+    //region Menu item's names
+    private static final String txtOpenTextFile = "From text file";
+    private static final String txtOpenFromDatabase = "From database";
+    private static final String txtSaveToTextFile = "To text file";
+    private static final String txtSaveToDatabase = "To database";
+    private static final String txtExit = "Exit";
+
+    private static final String txtPriceMoreFilter = "Price more than value";
+    private static final String txtPriceLessFilter = "Price less than value";
+    private static final String txtPriceRangeFilter = "Set price range";
+    private static final String txtClearFilter = "ClearFilter";
+
+    private static final String txtAdd = "Add";
+    private static final String txtEdit = "Edit";
+    private static final String txtDelete = "Delete";
+    private static final String txtDeleteMany = "Delete many";
+    private static final String txtClear = "Clear";
+
+    private static final String txtEditPopup = "Edit product";
+    private static final String txtDeletePopup = "Delete product";
     //endregion
 }
 

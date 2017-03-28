@@ -4,11 +4,11 @@ import task.ProductList;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
-public class ProductTableModel implements TableModel {
+class ProductTableModel implements TableModel {
 
     private ProductList productList;
 
-    public ProductTableModel(ProductList productList) {
+    ProductTableModel(ProductList productList) {
         this.productList = productList;
     }
 
