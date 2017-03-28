@@ -3,9 +3,7 @@ package dialogs;
 import javax.swing.*;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
-import java.awt.*;
 import java.awt.event.*;
-import java.text.NumberFormat;
 import java.util.Objects;
 
 public class PriceFilterFrame extends JDialog {
@@ -21,18 +19,11 @@ public class PriceFilterFrame extends JDialog {
     // Price range which this dialog returns as a result
     private int minPrice, maxPrice;
 
-    public PriceFilterFrame(String title) {
+    public PriceFilterFrame(NumberFormatter numberFormatter, String title) {
         setContentPane(contentPane);
         setModal(true);
         setTitle(title);
         getRootPane().setDefaultButton(buttonOK);
-
-        NumberFormat integerFormat = NumberFormat.getIntegerInstance();
-        NumberFormatter numberFormatter = new NumberFormatter(integerFormat);
-        numberFormatter.setValueClass(Integer.class);
-        numberFormatter.setMinimum(1);
-        numberFormatter.setMaximum(Integer.MAX_VALUE);
-        numberFormatter.setAllowsInvalid(false);
 
         DefaultFormatterFactory formatter = new DefaultFormatterFactory(numberFormatter);
         ftfMinPrice.setFormatterFactory(formatter);

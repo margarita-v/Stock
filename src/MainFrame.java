@@ -7,9 +7,12 @@ import task.ProductList;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.List;
 
 public class MainFrame extends JFrame implements ActionListener {
@@ -23,6 +26,7 @@ public class MainFrame extends JFrame implements ActionListener {
     private int selectedId;
 
     private ProductTableModel tableModel;
+    private NumberFormatter numberFormatter;
 
     private void createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
@@ -138,6 +142,21 @@ public class MainFrame extends JFrame implements ActionListener {
         Font font = new Font("Arial", Font.PLAIN, 12);
         UIManager.put("Menu.font", font);
         UIManager.put("MenuItem.font", font);
+
+        // Create numberFormatter for dialogs
+        NumberFormat integerFormat = NumberFormat.getIntegerInstance();
+        numberFormatter = new NumberFormatter(integerFormat) {
+            @Override
+            public Object stringToValue(String string) throws ParseException {
+                if (string == null || string.length() == 0)
+                    return null;
+                return super.stringToValue(string);
+            }
+        };
+        numberFormatter.setValueClass(Integer.class);
+        numberFormatter.setMinimum(1);
+        numberFormatter.setMaximum(Integer.MAX_VALUE);
+        numberFormatter.setAllowsInvalid(false);
 
         createMenuBar();
 
@@ -364,7 +383,7 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private void priceRangeFilter() {
         if (productList.size() > 0) {
-            PriceFilterFrame dialog = new PriceFilterFrame("Введите ценовой диапазон");
+            PriceFilterFrame dialog = new PriceFilterFrame(numberFormatter, "Введите ценовой диапазон");
             dialog.setVisible(true);
             int minPrice = dialog.getMinPrice(), maxPrice = dialog.getMaxPrice();
             if (minPrice > 0 && maxPrice > 0) {
@@ -387,7 +406,7 @@ public class MainFrame extends JFrame implements ActionListener {
 
     // Edit menu
     private void add() {
-        DialogFrame dialog = new DialogFrame("Добавление товара", null);
+        DialogFrame dialog = new DialogFrame(numberFormatter, "Добавление товара", null);
         dialog.setVisible(true);
         Product product = dialog.getProduct();
         if (product != null) {
@@ -425,7 +444,7 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     private void edit(int id, Product productForEdit) {
-        DialogFrame dialog = new DialogFrame("Редактирование товара", productForEdit);
+        DialogFrame dialog = new DialogFrame(numberFormatter, "Редактирование товара", productForEdit);
         dialog.setVisible(true);
         Product newProduct = dialog.getProduct();
         // if user didn't canceled dialog

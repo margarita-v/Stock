@@ -6,7 +6,6 @@ import javax.swing.*;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
 import java.awt.event.*;
-import java.text.NumberFormat;
 import java.util.Objects;
 
 public class DialogFrame extends JDialog {
@@ -25,18 +24,11 @@ public class DialogFrame extends JDialog {
     // Product which this dialog returns as a result
     private Product product;
 
-    public DialogFrame(String title, Product productForEdit) {
+    public DialogFrame(NumberFormatter numberFormatter, String title, Product productForEdit) {
         setContentPane(contentPane);
         setModal(true);
         setTitle(title);
         getRootPane().setDefaultButton(buttonOK);
-
-        NumberFormat integerFormat = NumberFormat.getIntegerInstance();
-        NumberFormatter numberFormatter = new NumberFormatter(integerFormat);
-        numberFormatter.setValueClass(Integer.class);
-        numberFormatter.setMinimum(1);
-        numberFormatter.setMaximum(Integer.MAX_VALUE);
-        numberFormatter.setAllowsInvalid(false);
 
         DefaultFormatterFactory formatter = new DefaultFormatterFactory(numberFormatter);
         ftfId.setFormatterFactory(formatter);
