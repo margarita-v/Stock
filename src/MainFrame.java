@@ -16,16 +16,21 @@ import java.text.ParseException;
 import java.util.List;
 
 public class MainFrame extends JFrame implements ActionListener {
-
+    // Default components
     private JPanel rootPanel;
     private JTable table;
     private JPopupMenu popupMenu;
 
+    // Main product list
     private ProductList productList;
+    // Product list which will be created after filter apply
     private ProductList filterResult;
+    // ID of selected product in a table
     private int selectedId;
 
+    // Table model for JTable based on main product list
     private ProductTableModel tableModel;
+
     private NumberFormatter numberFormatter;
     private JFileChooser fileChooser;
 
@@ -541,4 +546,3 @@ public class MainFrame extends JFrame implements ActionListener {
     private static final String txtDeletePopup = "Delete product";
     //endregion
 }
-
