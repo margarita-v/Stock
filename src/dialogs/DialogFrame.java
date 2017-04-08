@@ -1,6 +1,9 @@
 package dialogs;
 
 import models.AbstractProduct;
+import models.Book;
+import models.Clothes;
+import models.Food;
 
 import javax.swing.*;
 import javax.swing.text.DefaultFormatterFactory;
@@ -19,10 +22,15 @@ public class DialogFrame extends JDialog {
     private JTextField textFieldName;
     private JFormattedTextField ftfPrice;
     private JFormattedTextField ftfCount;
-    private JTextField textFieldDescription;
+    private JTextField textFieldString;
+    private JLabel lblString;
+    private JLabel lblInt;
+    private JFormattedTextField ftfInt;
 
     // AbstractProduct which this dialog returns as a result
     private AbstractProduct product;
+
+    private AbstractProduct productForEdit;
 
     public DialogFrame(NumberFormatter numberFormatter, String title, AbstractProduct productForEdit) {
         setContentPane(contentPane);
@@ -36,12 +44,33 @@ public class DialogFrame extends JDialog {
         ftfCount.setFormatterFactory(formatter);
 
         // Pre-filling product's fields if this dialog is using for edit
+        this.productForEdit = productForEdit;
         if (productForEdit != null) {
             ftfId.setValue(productForEdit.getId());
             textFieldName.setText(productForEdit.getName());
             ftfPrice.setValue(productForEdit.getPrice());
             ftfCount.setValue(productForEdit.getQuantity());
-            textFieldDescription.setText(productForEdit.getDescription());
+
+            if (productForEdit instanceof Food) {
+                lblInt.setText("Вес");
+                lblInt.setVisible(true);
+                ftfInt.setVisible(true);
+                ftfInt.setFormatterFactory(formatter);
+                ftfInt.setValue(((Food) productForEdit).getWeight());
+            }
+            else {
+                lblString.setVisible(true);
+                textFieldString.setVisible(true);
+
+                if (productForEdit instanceof Book) {
+                    lblString.setText("Жанр");
+                    textFieldString.setText(((Book) productForEdit).getGenre());
+                }
+                else {
+                    lblString.setText("Цвет");
+                    textFieldString.setText(((Clothes) productForEdit).getColor());
+                }
+            }
         }
 
         buttonOK.addActionListener(e -> onOK());
@@ -69,6 +98,8 @@ public class DialogFrame extends JDialog {
         String name = textFieldName.getText();
         Object countObj = ftfCount.getValue();
         Object priceObj = ftfPrice.getValue();
+        String stringField = textFieldString.getText();
+        Object intField = ftfInt.getValue();
 
         if (!Objects.equals(idObj, null) && !Objects.equals(name, "")
                 && !Objects.equals(countObj, null) && !Objects.equals(priceObj, null)) {
@@ -77,7 +108,15 @@ public class DialogFrame extends JDialog {
                 int price = (int) priceObj;
                 int count = (int) countObj;
 
-                product = new AbstractProduct(id, name, price, count, textFieldDescription.getText());
+                if (!Objects.equals(stringField, "")){
+                    if (productForEdit instanceof Book)
+                        product = new Book(id, name, price, count, stringField);
+                    else if (productForEdit instanceof Clothes)
+                        product = new Clothes(id, name, price, count, stringField);
+                }
+                else if (intField != null && productForEdit instanceof Food)
+                    product = new Food(id, name, price, count, (int) intField);
+
                 dispose();
 
             } catch (NumberFormatException e) {
