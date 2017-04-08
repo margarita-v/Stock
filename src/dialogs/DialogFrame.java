@@ -1,6 +1,6 @@
 package dialogs;
 
-import task.Product;
+import models.AbstractProduct;
 
 import javax.swing.*;
 import javax.swing.text.DefaultFormatterFactory;
@@ -21,10 +21,10 @@ public class DialogFrame extends JDialog {
     private JFormattedTextField ftfCount;
     private JTextField textFieldDescription;
 
-    // Product which this dialog returns as a result
-    private Product product;
+    // AbstractProduct which this dialog returns as a result
+    private AbstractProduct product;
 
-    public DialogFrame(NumberFormatter numberFormatter, String title, Product productForEdit) {
+    public DialogFrame(NumberFormatter numberFormatter, String title, AbstractProduct productForEdit) {
         setContentPane(contentPane);
         setModal(true);
         setTitle(title);
@@ -77,7 +77,7 @@ public class DialogFrame extends JDialog {
                 int price = (int) priceObj;
                 int count = (int) countObj;
 
-                product = new Product(id, name, price, count, textFieldDescription.getText());
+                product = new AbstractProduct(id, name, price, count, textFieldDescription.getText());
                 dispose();
 
             } catch (NumberFormatException e) {
@@ -96,7 +96,7 @@ public class DialogFrame extends JDialog {
         dispose();
     }
 
-    public Product getProduct() {
+    public AbstractProduct getProduct() {
         return product;
     }
 }

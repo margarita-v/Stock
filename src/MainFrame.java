@@ -1,7 +1,7 @@
 import dialogs.DeleteManyFrame;
 import dialogs.DialogFrame;
 import dialogs.PriceFilterFrame;
-import task.Product;
+import models.AbstractProduct;
 import task.ProductList;
 
 import javax.swing.*;
@@ -23,7 +23,7 @@ public class MainFrame extends JFrame implements ActionListener {
 
     // Main product list
     private ProductList productList;
-    // Product list which will be created after filter apply
+    // AbstractProduct list which will be created after filter apply
     private ProductList filterResult;
     // ID of selected product in a table
     private int selectedId;
@@ -400,7 +400,7 @@ public class MainFrame extends JFrame implements ActionListener {
     private void add() {
         DialogFrame dialog = new DialogFrame(numberFormatter, "Добавление товара", null);
         dialog.setVisible(true);
-        Product product = dialog.getProduct();
+        AbstractProduct product = dialog.getProduct();
         if (product != null) {
             if (productList.add(product)) {
                 table.setAutoCreateRowSorter(true);
@@ -420,7 +420,7 @@ public class MainFrame extends JFrame implements ActionListener {
             if (result != null) {
                 try {
                     int id = Integer.parseInt(result);
-                    Product productForEdit = productList.getById(id);
+                    AbstractProduct productForEdit = productList.getById(id);
                     if (productForEdit == null)
                         showErrorMessage("Товар с данным ID не найден.");
                     else
@@ -435,10 +435,10 @@ public class MainFrame extends JFrame implements ActionListener {
             showMessage("Список товаров пуст.");
     }
 
-    private void edit(int id, Product productForEdit) {
+    private void edit(int id, AbstractProduct productForEdit) {
         DialogFrame dialog = new DialogFrame(numberFormatter, "Редактирование товара", productForEdit);
         dialog.setVisible(true);
-        Product newProduct = dialog.getProduct();
+        AbstractProduct newProduct = dialog.getProduct();
         // if user didn't canceled dialog
         if (newProduct != null) {
             if (productList.edit(id, newProduct)) {

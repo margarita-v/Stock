@@ -1,12 +1,17 @@
-import task.Product;
+import models.AbstractProduct;
+import models.Book;
+import models.Clothes;
+import models.Food;
 import task.ProductList;
 
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
+import java.util.Objects;
 
 class ProductTableModel implements TableModel {
 
     private ProductList productList;
+    private String[] columnNames = {"ID", "Название", "Цена", "Количество", "Жанр", "Цвет", "Вес"};
 
     ProductTableModel(ProductList productList) {
         this.productList = productList;
@@ -19,26 +24,18 @@ class ProductTableModel implements TableModel {
 
     @Override
     public int getColumnCount() {
-        return Product.REQUIRED_FIELDS + 1;
+        return columnNames.length;
     }
 
     @Override
     public String getColumnName(int i) {
-        switch (i) {
-            case 0: return "ID";
-            case 1: return "Название";
-            case 2: return "Цена";
-            case 3: return "Количество";
-            case 4: return "Описание";
-            default: return "";
-        }
+        return columnNames[i];
     }
 
     @Override
     public Class<?> getColumnClass(int i) {
-        if (productList.size() == 0) {
+        if (productList.size() == 0)
             return Object.class;
-        }
         return getValueAt(0, i).getClass();
     }
 
@@ -49,15 +46,13 @@ class ProductTableModel implements TableModel {
 
     @Override
     public Object getValueAt(int i, int i1) {
-        Product product = productList.getProductByIndex(i);
-        switch (i1) {
-            case 0: return product.getId();
-            case 1: return product.getName();
-            case 2: return product.getPrice();
-            case 3: return product.getQuantity();
-            case 4: return product.getDescription();
-            default: return "";
-        }
+        AbstractProduct product = productList.getProductByIndex(i);
+        String[] items = product.toString().split(" ");
+        if (i1 < 4 || Objects.equals(columnNames[i1], "Жанр") && product.getClass() == Book.class ||
+                Objects.equals(columnNames[i1], "Цвет") && product.getClass() == Clothes.class ||
+                Objects.equals(columnNames[i1], "Вес") && product.getClass() == Food.class)
+            return items[i1];
+        return "";
     }
 
     @Override

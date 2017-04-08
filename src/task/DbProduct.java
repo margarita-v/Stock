@@ -1,5 +1,7 @@
 package task;
 
+import models.AbstractProduct;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +35,7 @@ public class DbProduct {
     // Create table
     /*
     public void createDatabase() throws SQLException, ClassNotFoundException {
-        String SQL_CREATE_TABLE = "CREATE TABLE Product("
+        String SQL_CREATE_TABLE = "CREATE TABLE AbstractProduct("
                 + "id_product INTEGER NOT NULL, "
                 + "product_name VARCHAR(20) NOT NULL, "
                 + "price INTEGER NOT NULL, "
@@ -46,19 +48,19 @@ public class DbProduct {
 
     // Drop table
     public void dropDatabase() throws SQLException, ClassNotFoundException {
-        String SQL_DROP_TABLE = "DROP TABLE Product";
+        String SQL_DROP_TABLE = "DROP TABLE AbstractProduct";
         executeQuery(SQL_DROP_TABLE);
     }*/
 
     // Clear table
     public void clearTable() throws SQLException, ClassNotFoundException {
-        String SQL_TRUNCATE_TABLE = "TRUNCATE TABLE Product";
+        String SQL_TRUNCATE_TABLE = "TRUNCATE TABLE AbstractProduct";
         executeQuery(SQL_TRUNCATE_TABLE);
     }
 
     // Get all records in database
-    public List<Product> getAll() throws SQLException, ClassNotFoundException {
-        List<Product> products = new ArrayList<>();
+    public List<AbstractProduct> getAll() throws SQLException, ClassNotFoundException {
+        List<AbstractProduct> products = new ArrayList<>();
         Connection connection = getConnection();
 
         String selectSQL = "SELECT * FROM Product";
@@ -72,7 +74,7 @@ public class DbProduct {
             int quantity = rs.getInt("quantity");
             String description = rs.getString("description");
 
-            Product product = new Product(id, name, price, quantity, description);
+            AbstractProduct product = new AbstractProduct(id, name, price, quantity, description);
             products.add(product);
         }
 
@@ -82,8 +84,8 @@ public class DbProduct {
     }
 
     // Get product by id
-    public static Product getById(int id) throws SQLException, ClassNotFoundException {
-        Product student = null;
+    public static AbstractProduct getById(int id) throws SQLException, ClassNotFoundException {
+        AbstractProduct student = null;
         Connection connection = getConnection();
 
         String selectSQL = "SELECT * FROM Product WHERE id_product = ?";
@@ -96,7 +98,7 @@ public class DbProduct {
             int price = rs.getInt("price");
             int quantity = rs.getInt("quantity");
             String description = rs.getString("description");
-            student = new Product(id, name, price, quantity, description);
+            student = new AbstractProduct(id, name, price, quantity, description);
         }
 
         statement.close();
@@ -105,7 +107,7 @@ public class DbProduct {
     }
 
     // Insert product to database
-    public void insert(Product product) throws SQLException, ClassNotFoundException {
+    public void insert(AbstractProduct product) throws SQLException, ClassNotFoundException {
         Connection connection = getConnection();
             String insertTableSQL = "INSERT INTO Product("
                 + "id_product, product_name, price, quantity, description) "
@@ -124,7 +126,7 @@ public class DbProduct {
     }
 
     // Update record in database by id
-    public void update(Product product) throws SQLException, ClassNotFoundException {
+    public void update(AbstractProduct product) throws SQLException, ClassNotFoundException {
         Connection connection = getConnection();
         String updateTableSQL = "UPDATE Product SET "
                 + "product_name = ?, "
@@ -146,7 +148,7 @@ public class DbProduct {
     }
 
     // Delete product from database
-    public void delete(Product product) throws SQLException, ClassNotFoundException {
+    public void delete(AbstractProduct product) throws SQLException, ClassNotFoundException {
         Connection connection = getConnection();
         String deleteTableSQL = "DELETE FROM Product "
                 + "WHERE id_product = ?";

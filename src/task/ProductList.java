@@ -1,5 +1,8 @@
 package task;
 
+import models.AbstractProduct;
+import models.Food;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -11,7 +14,7 @@ import java.util.function.Predicate;
 
 public class ProductList {
 
-    private List<Product> products;
+    private List<AbstractProduct> products;
     private DbProduct dbProducts;
 
     public ProductList() {
@@ -25,7 +28,7 @@ public class ProductList {
 
     public ProductList filter(Predicate<Integer> condition) {
         ProductList result = new ProductList();
-        for (Product product: products) {
+        for (AbstractProduct product: products) {
             if (condition.test(product.getPrice()))
                 result.add(product);
         }
@@ -34,14 +37,14 @@ public class ProductList {
 
     //region Helpful functions
     // Get product by index in product list; need for product table model
-    public Product getProductByIndex(int index) {
+    public AbstractProduct getProductByIndex(int index) {
         return products.get(index);
     }
 
     // Get ids of all products; need for delete a set of products
     public List<Integer> getProductsIDs() {
         List<Integer> result = new ArrayList<>();
-        for (Product product: products) {
+        for (AbstractProduct product: products) {
             result.add(product.getId());
         }
         return result;
@@ -49,7 +52,7 @@ public class ProductList {
 
     // Find product by id
     private boolean find(int id) {
-        for (Product product: products) {
+        for (AbstractProduct product: products) {
             if (product.getId() == id)
                 return true;
         }
@@ -58,15 +61,15 @@ public class ProductList {
 
     // Get product's index by id
     private int getIndex(int id) {
-        Product product = getById(id);
+        AbstractProduct product = getById(id);
         if (product != null)
             return products.indexOf(product);
         return -1;
     }
 
     // Get product by id
-    public Product getById(int id) {
-        for (Product product: products) {
+    public AbstractProduct getById(int id) {
+        for (AbstractProduct product: products) {
             if (product.getId() == id)
                 return product;
         }
@@ -76,7 +79,7 @@ public class ProductList {
 
     //region Edit functions
     // Add product to the list of products
-    public boolean add(Product product) {
+    public boolean add(AbstractProduct product) {
         if (!find(product.getId())) {
             products.add(product);
             return true;
@@ -86,7 +89,7 @@ public class ProductList {
 
     // Delete product from the list of products
     public boolean delete(int id) {
-        Product product = getById(id);
+        AbstractProduct product = getById(id);
         if (product != null) {
             products.remove(product);
             return true;
@@ -95,7 +98,7 @@ public class ProductList {
     }
 
     // Edit product by id and replace them with newProduct
-    public boolean edit(int id, Product newProduct) {
+    public boolean edit(int id, AbstractProduct newProduct) {
         if (find(id)) {
             // ID wasn't changed, but other fields were changed
             if (id == newProduct.getId()) {
@@ -143,7 +146,7 @@ public class ProductList {
             for (String line: lines) {
                 // get all words in current line
                 String[] words = line.split(" ");
-                if (line.length() < Product.REQUIRED_FIELDS)
+                if (line.length() < AbstractProduct.REQUIRED_FIELDS)
                     return false; // not enough parameters
                 // get info about product from current line
                 Integer id = Integer.parseInt(words[0]);
@@ -152,10 +155,10 @@ public class ProductList {
                 Integer quantity = Integer.parseInt(words[3]);
                 String description = "";
                 // if line contains description
-                for (int i = Product.REQUIRED_FIELDS; i < words.length; i++)
+                for (int i = AbstractProduct.REQUIRED_FIELDS; i < words.length; i++)
                     description += words[i] + " ";
 
-                Product product = new Product(id, name, price, quantity, description);
+                AbstractProduct product = new AbstractProduct(id, name, price, quantity, description);
                 products.add(product);
             }
             // all lines in file were correct
@@ -186,7 +189,7 @@ public class ProductList {
     // Save info to text file
     public void saveToFile(String fileName) {
         List<String> lines = new ArrayList<>();
-        for (Product p: products) {
+        for (AbstractProduct p: products) {
             lines.add(p.toString());
         }
         try {
@@ -200,7 +203,7 @@ public class ProductList {
     public void saveToDatabase() {
         try {
             dbProducts.clearTable();
-            for (Product p: products) {
+            for (AbstractProduct p: products) {
                 dbProducts.insert(p);
             }
         } catch (SQLException | ClassNotFoundException e) {
