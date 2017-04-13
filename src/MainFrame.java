@@ -7,13 +7,17 @@ import task.ProductList;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 public class MainFrame extends JFrame implements ActionListener {
     // Default components
@@ -30,6 +34,7 @@ public class MainFrame extends JFrame implements ActionListener {
 
     // Table model for JTable based on main product list
     private ProductTableModel tableModel;
+    private TableRowSorter<TableModel> sorter;
 
     private NumberFormatter numberFormatter;
     private JFileChooser fileChooser;
@@ -190,18 +195,32 @@ public class MainFrame extends JFrame implements ActionListener {
         table = new JTable(tableModel);
         getContentPane().add(new JScrollPane(table));
 
-        /*
-        TableRowSorter sorter = new TableRowSorter(tableModel);
-        List<RowSorter.SortKey> sortKeys = new ArrayList<>();
-        sortKeys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
-        sorter.setSortKeys(sortKeys);
+        // Set sorter for table
+        sorter = new TableRowSorter<>(table.getModel());
+        // Set comparator for last column, where weight is an optional field
+        sorter.setComparator(6, new Comparator<String>() {
+            @Override
+            public int compare(String value1, String value2) {
+                boolean firstNull = Objects.equals(value1, "-"),
+                        secondNull = Objects.equals(value2, "-");
+                if (firstNull || secondNull) {
+                    if (firstNull && !secondNull)
+                        return 1;
+                    if (!firstNull)
+                        return -1;
+                    return 0;
+                }
+                int firstValue = Integer.parseInt(value1);
+                int secondValue = Integer.parseInt(value2);
+                return firstValue < secondValue ? -1 : firstValue == secondValue ? 0 : 1;
+            }
+        });
         table.setRowSorter(sorter);
-        */
 
         // Render integer values on center
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-        table.setDefaultRenderer(String.class, centerRenderer);
+        table.setDefaultRenderer(Integer.class, centerRenderer);
 
         createPopupMenu();
         table.setComponentPopupMenu(popupMenu);
@@ -211,7 +230,7 @@ public class MainFrame extends JFrame implements ActionListener {
                 Point point = mouseEvent.getPoint();
                 int currentRow = table.rowAtPoint(point);
                 // get ID of chosen product
-                selectedId = Integer.parseInt(table.getValueAt(currentRow, 0).toString());
+                selectedId = (Integer) table.getValueAt(currentRow, 0);
             }
         });
         pack();
@@ -281,6 +300,7 @@ public class MainFrame extends JFrame implements ActionListener {
                 break;
             case txtDeletePopup:
                 productList.delete(selectedId);
+                sorter.sort();
                 table.updateUI();
                 showMessage("Товар был удален");
                 break;
@@ -296,7 +316,6 @@ public class MainFrame extends JFrame implements ActionListener {
         if (res == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
             if (productList.loadFromFile(file.getName())) {
-                table.setAutoCreateRowSorter(true);
                 table.updateUI();
                 showMessage("Данные из файла были загружены.");
             }
@@ -307,7 +326,6 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private void openFromDatabase() {
         if (productList.loadFromDatabase()) {
-            table.setAutoCreateRowSorter(true);
             table.updateUI();
             showMessage("Данные из базы данных были загружены");
         }
@@ -403,7 +421,7 @@ public class MainFrame extends JFrame implements ActionListener {
         AbstractProduct product = dialog.getProduct();
         if (product != null) {
             if (productList.add(product)) {
-                table.setAutoCreateRowSorter(true);
+                sorter.sort();
                 table.updateUI();
                 showMessage("Товар был добавлен");
             }
@@ -442,6 +460,7 @@ public class MainFrame extends JFrame implements ActionListener {
         // if user didn't canceled dialog
         if (newProduct != null) {
             if (productList.edit(id, newProduct)) {
+                sorter.sort();
                 table.updateUI();
                 showMessage("Товар был отредактирован.");
                 // ID of selected product was changed
@@ -462,7 +481,7 @@ public class MainFrame extends JFrame implements ActionListener {
                     if (!productList.delete(id))
                         showErrorMessage("Товар с данным ID не найден.");
                     else {
-                        table.setAutoCreateRowSorter(true);
+                        sorter.sort();
                         table.updateUI();
                         showMessage("Товар был удален.");
                     }
@@ -484,7 +503,7 @@ public class MainFrame extends JFrame implements ActionListener {
                 for (Integer id : chosenItems) {
                     productList.delete(id);
                 }
-                table.setAutoCreateRowSorter(true);
+                //table.setAutoCreateRowSorter(true);
                 table.updateUI();
                 showMessage("Выбранные товары были удалены.");
             }

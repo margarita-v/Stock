@@ -194,7 +194,13 @@ public class ProductList {
     public void saveToFile(String fileName) {
         List<String> lines = new ArrayList<>();
         for (AbstractProduct p: products) {
-            lines.add(p.toString());
+            String info = p.toString();
+            if (p instanceof Book)
+                lines.add("BOOK " + info);
+            else if (p instanceof Clothes)
+                lines.add("CLOTHES " + info);
+            else
+                lines.add("FOOD " + info);
         }
         try {
             Files.write(Paths.get(fileName), lines, StandardCharsets.UTF_8);

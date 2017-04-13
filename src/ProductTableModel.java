@@ -6,7 +6,6 @@ import task.ProductList;
 
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
-import java.util.Objects;
 
 class ProductTableModel implements TableModel {
 
@@ -47,14 +46,26 @@ class ProductTableModel implements TableModel {
     @Override
     public Object getValueAt(int i, int i1) {
         AbstractProduct product = productList.getProductByIndex(i);
-        String[] items = product.toString().split(" ");
-        if (i1 < columnNames.length - 3)
-            return items[i1];
-        if (Objects.equals(columnNames[i1], "Жанр") && product instanceof Book ||
-                Objects.equals(columnNames[i1], "Цвет") && product instanceof Clothes ||
-                Objects.equals(columnNames[i1], "Вес") && product instanceof Food)
-            return items[items.length - 1];
-        return "-";
+        switch(i1) {
+            case 0: return product.getId();
+            case 1: return product.getName();
+            case 2: return product.getPrice();
+            case 3: return product.getQuantity();
+            case 4:
+                if (product instanceof Book)
+                    return ((Book) product).getGenre();
+                return "-";
+            case 5:
+                if (product instanceof Clothes)
+                    return ((Clothes) product).getColor();
+                return "-";
+            case 6:
+                if (product instanceof Food)
+                    return Integer.toString(((Food) product).getWeight());
+                return "-";
+            default:
+                return "-";
+        }
     }
 
     @Override
