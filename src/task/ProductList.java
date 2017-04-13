@@ -1,7 +1,6 @@
 package task;
 
-import models.AbstractProduct;
-import models.Food;
+import models.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -146,30 +145,36 @@ public class ProductList {
             for (String line: lines) {
                 // get all words in current line
                 String[] words = line.split(" ");
-                if (line.length() < AbstractProduct.REQUIRED_FIELDS)
-                    return false; // not enough parameters
                 // get info about product from current line
-                Integer id = Integer.parseInt(words[0]);
-                String name = words[1];
-                Integer price = Integer.parseInt(words[2]);
-                Integer quantity = Integer.parseInt(words[3]);
-                String description = "";
-                // if line contains description
-                for (int i = AbstractProduct.REQUIRED_FIELDS; i < words.length; i++)
-                    description += words[i] + " ";
-
-                AbstractProduct product = new AbstractProduct(id, name, price, quantity, description);
-                products.add(product);
+                ProductType productType = ProductType.valueOf(words[0]);
+                Integer id = Integer.parseInt(words[1]);
+                String name = words[2];
+                Integer price = Integer.parseInt(words[3]);
+                Integer quantity = Integer.parseInt(words[4]);
+                switch (productType) {
+                    case BOOK:
+                        String genre = words[5];
+                        Book book = new Book(id, name, price, quantity, genre);
+                        products.add(book);
+                        break;
+                    case CLOTHES:
+                        String color = words[5];
+                        Clothes clothes = new Clothes(id, name, price, quantity, color);
+                        products.add(clothes);
+                        break;
+                    case FOOD:
+                        int weight = Integer.parseInt(words[5]);
+                        Food food = new Food(id, name, price, quantity, weight);
+                        products.add(food);
+                        break;
+                }
             }
             // all lines in file were correct
             return true;
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-        catch (NumberFormatException e) {
+        } catch (IOException | NumberFormatException | IndexOutOfBoundsException e) {
             // file is incorrect
+            e.printStackTrace();
             return false;
         }
     }

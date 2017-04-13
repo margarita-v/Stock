@@ -1,6 +1,9 @@
 package task;
 
 import models.AbstractProduct;
+import models.Book;
+import models.Clothes;
+import models.Food;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -44,105 +47,53 @@ public class DbProduct {
                 + "PRIMARY KEY (id_product) "
                 + ")";
         executeQuery(SQL_CREATE_TABLE);
-    }
-
-    // Drop table
-    public void dropDatabase() throws SQLException, ClassNotFoundException {
-        String SQL_DROP_TABLE = "DROP TABLE AbstractProduct";
-        executeQuery(SQL_DROP_TABLE);
     }*/
 
     // Clear table
     public void clearTable() throws SQLException, ClassNotFoundException {
-        String SQL_TRUNCATE_TABLE = "TRUNCATE TABLE AbstractProduct";
+        String SQL_TRUNCATE_TABLE = "TRUNCATE TABLE Product";
         executeQuery(SQL_TRUNCATE_TABLE);
-    }
-
-    // Get all records in database
-    public List<AbstractProduct> getAll() throws SQLException, ClassNotFoundException {
-        List<AbstractProduct> products = new ArrayList<>();
-        Connection connection = getConnection();
-
-        String selectSQL = "SELECT * FROM Product";
-        PreparedStatement statement = connection.prepareStatement(selectSQL);
-        ResultSet rs = statement.executeQuery();
-
-        while (rs.next()) {
-            int id = rs.getInt("id_product");
-            String name = rs.getString("product_name");
-            int price = rs.getInt("price");
-            int quantity = rs.getInt("quantity");
-            String description = rs.getString("description");
-
-            AbstractProduct product = new AbstractProduct(id, name, price, quantity, description);
-            products.add(product);
-        }
-
-        statement.close();
-        connection.close();
-        return products;
-    }
-
-    // Get product by id
-    public static AbstractProduct getById(int id) throws SQLException, ClassNotFoundException {
-        AbstractProduct student = null;
-        Connection connection = getConnection();
-
-        String selectSQL = "SELECT * FROM Product WHERE id_product = ?";
-        PreparedStatement statement = connection.prepareStatement(selectSQL);
-        statement.setInt(1, id);
-
-        ResultSet rs = statement.executeQuery();
-        if (rs.next()) {
-            String name = rs.getString("product_name");
-            int price = rs.getInt("price");
-            int quantity = rs.getInt("quantity");
-            String description = rs.getString("description");
-            student = new AbstractProduct(id, name, price, quantity, description);
-        }
-
-        statement.close();
-        connection.close();
-        return student;
     }
 
     // Insert product to database
     public void insert(AbstractProduct product) throws SQLException, ClassNotFoundException {
         Connection connection = getConnection();
-            String insertTableSQL = "INSERT INTO Product("
-                + "id_product, product_name, price, quantity, description) "
-                + "VALUES(?,?,?,?,?)";
+        String insertTableSQL = "INSERT INTO Product("
+                + "id, product_name, price, quantity) "
+                + "VALUES(?,?,?,?)";
         PreparedStatement statement = connection.prepareStatement(insertTableSQL);
 
         statement.setInt(1, product.getId());
         statement.setString(2, product.getName());
         statement.setInt(3, product.getPrice());
         statement.setInt(4, product.getQuantity());
-        statement.setString(5, product.getDescription());
         statement.executeUpdate();
 
-        statement.close();
-        connection.close();
-    }
-
-    // Update record in database by id
-    public void update(AbstractProduct product) throws SQLException, ClassNotFoundException {
-        Connection connection = getConnection();
-        String updateTableSQL = "UPDATE Product SET "
-                + "product_name = ?, "
-                + "price = ?, "
-                + "quantity = ?, "
-                + "description = ? "
-                + "WHERE id_product = ?";
-        PreparedStatement statement = connection.prepareStatement(updateTableSQL);
-
-        statement.setString(1, product.getName());
-        statement.setInt(2, product.getPrice());
-        statement.setInt(3, product.getQuantity());
-        statement.setString(4, product.getDescription());
-        statement.setInt(5, product.getId());
+        if (product instanceof Book) {
+            insertTableSQL = "INSERT INTO Books("
+                    + "id, genre) "
+                    + "VALUES(?,?)";
+            statement = connection.prepareStatement(insertTableSQL);
+            statement.setInt(1, product.getId());
+            statement.setString(2, ((Book) product).getGenre());
+        }
+        else if (product instanceof Clothes) {
+            insertTableSQL = "INSERT INTO Clothes("
+                    + "id, color) "
+                    + "VALUES(?,?)";
+            statement = connection.prepareStatement(insertTableSQL);
+            statement.setInt(1, product.getId());
+            statement.setString(2, ((Clothes) product).getColor());
+        }
+        else if (product instanceof Food) {
+            insertTableSQL = "INSERT INTO Food("
+                    + "id, weight) "
+                    + "VALUES(?,?)";
+            statement = connection.prepareStatement(insertTableSQL);
+            statement.setInt(1, product.getId());
+            statement.setInt(2, ((Food) product).getWeight());
+        }
         statement.executeUpdate();
-
         statement.close();
         connection.close();
     }
@@ -150,8 +101,7 @@ public class DbProduct {
     // Delete product from database
     public void delete(AbstractProduct product) throws SQLException, ClassNotFoundException {
         Connection connection = getConnection();
-        String deleteTableSQL = "DELETE FROM Product "
-                + "WHERE id_product = ?";
+        String deleteTableSQL = "DELETE FROM Product WHERE id = ?";
         PreparedStatement statement = connection.prepareStatement(deleteTableSQL);
 
         statement.setInt(1, product.getId());
@@ -160,4 +110,77 @@ public class DbProduct {
         statement.close();
         connection.close();
     }
+
+    //region Get all products
+
+    // Get all records in database
+    public List<AbstractProduct> getAll() throws SQLException, ClassNotFoundException {
+        List<AbstractProduct> products = new ArrayList<>();
+        Connection connection = getConnection();
+
+        products.addAll(getAllBooks(connection));
+        products.addAll(getAllClothes(connection));
+        products.addAll(getAllFood(connection));
+
+        connection.close();
+        return products;
+    }
+
+    private List<Book> getAllBooks(Connection connection) throws SQLException {
+        List<Book> result = new ArrayList<>();
+        String selectSQL = "SELECT * FROM Product JOIN Books ON Product.id = Books.id";
+        PreparedStatement statement = connection.prepareStatement(selectSQL);
+        ResultSet rs = statement.executeQuery();
+        while (rs.next()) {
+            int id = rs.getInt("id");
+            String name = rs.getString("product_name");
+            int price = rs.getInt("price");
+            int quantity = rs.getInt("quantity");
+            String genre = rs.getString("genre");
+
+            Book book = new Book(id, name, price, quantity, genre);
+            result.add(book);
+        }
+        statement.close();
+        return result;
+    }
+
+    private List<Clothes> getAllClothes(Connection connection) throws SQLException {
+        List<Clothes> result = new ArrayList<>();
+        String selectSQL = "SELECT * FROM Product JOIN Clothes ON Product.id = Clothes.id";
+        PreparedStatement statement = connection.prepareStatement(selectSQL);
+        ResultSet rs = statement.executeQuery();
+        while (rs.next()) {
+            int id = rs.getInt("id");
+            String name = rs.getString("product_name");
+            int price = rs.getInt("price");
+            int quantity = rs.getInt("quantity");
+            String color = rs.getString("color");
+
+            Clothes clothes = new Clothes(id, name, price, quantity, color);
+            result.add(clothes);
+        }
+        statement.close();
+        return result;
+    }
+
+    private List<Food> getAllFood(Connection connection) throws SQLException {
+        List<Food> result = new ArrayList<>();
+        String selectSQL = "SELECT * FROM Product JOIN Food ON Product.id = Food.id";
+        PreparedStatement statement = connection.prepareStatement(selectSQL);
+        ResultSet rs = statement.executeQuery();
+        while (rs.next()) {
+            int id = rs.getInt("id");
+            String name = rs.getString("product_name");
+            int price = rs.getInt("price");
+            int quantity = rs.getInt("quantity");
+            int weight = rs.getInt("weight");
+
+            Food food = new Food(id, name, price, quantity, weight);
+            result.add(food);
+        }
+        statement.close();
+        return result;
+    }
+    //endregion
 }
