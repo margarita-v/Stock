@@ -35,12 +35,19 @@ public class DialogFrame extends JDialog implements ActionListener {
     private JLabel lblBook;
     private JLabel lblClothes;
     private JLabel lblFood;
+    private JPanel panelForAdd;
+    private JTextField textFieldString;
+    private JFormattedTextField ftfInt;
+    private JLabel lblString;
+    private JLabel lblInt;
     //endregion
 
     // AbstractProduct which this dialog returns as a result
     private AbstractProduct product;
 
-    public DialogFrame(NumberFormatter numberFormatter, String title) {
+    private AbstractProduct productForEdit;
+
+    public DialogFrame(NumberFormatter numberFormatter, String title, AbstractProduct productForEdit) {
         setContentPane(contentPane);
         setModal(true);
         setTitle(title);
@@ -51,6 +58,7 @@ public class DialogFrame extends JDialog implements ActionListener {
         ftfPrice.setFormatterFactory(formatter);
         ftfCount.setFormatterFactory(formatter);
         ftfFood.setFormatterFactory(formatter);
+        ftfInt.setFormatterFactory(formatter);
 
         // Configure radio group
         rbBook.addActionListener(this);
@@ -60,6 +68,10 @@ public class DialogFrame extends JDialog implements ActionListener {
         group.add(rbBook);
         group.add(rbClothes);
         group.add(rbFood);
+
+        // Pre-filling product's fields if this dialog is using for edit
+        this.productForEdit = productForEdit;
+        fillForEdit();
 
         buttonOK.addActionListener(e -> onOK());
 
@@ -87,9 +99,9 @@ public class DialogFrame extends JDialog implements ActionListener {
         Object countObj = ftfCount.getValue();
         Object priceObj = ftfPrice.getValue();
 
-        String genre = textFieldBook.getText();
-        String color = textFieldClothes.getText();
-        Object weightObj = ftfFood.getValue();
+        String genre = productForEdit != null ? textFieldString.getText() : textFieldBook.getText();
+        String color = productForEdit != null ? textFieldString.getText() : textFieldClothes.getText();
+        Object weightObj = productForEdit != null ? ftfInt.getValue() : ftfFood.getValue();
 
         if (!Objects.equals(idObj, null) && !Objects.equals(name, "")
                 && !Objects.equals(countObj, null) && !Objects.equals(priceObj, null)
@@ -100,14 +112,19 @@ public class DialogFrame extends JDialog implements ActionListener {
                 int price = (int) priceObj;
                 int count = (int) countObj;
 
-                if (rbBook.isSelected())
+                boolean usedForEdit = productForEdit != null;
+
+                if (usedForEdit && productForEdit instanceof Book ||
+                        !usedForEdit && rbBook.isSelected())
                     product = new Book(id, name, price, count, genre);
-                else if (rbClothes.isSelected())
+                else if (usedForEdit && productForEdit instanceof Clothes ||
+                        !usedForEdit && rbClothes.isSelected())
                     product = new Clothes(id, name, price, count, color);
                 else {
                     int weight = (int) weightObj;
                     product = new Food(id, name, price, count, weight);
                 }
+
                 dispose();
 
             } catch (NumberFormatException e) {
@@ -144,5 +161,35 @@ public class DialogFrame extends JDialog implements ActionListener {
 
         lblFood.setEnabled(foodChecked);
         ftfFood.setEnabled(foodChecked);
+    }
+
+    private void fillForEdit() {
+        if (productForEdit != null) {
+            panelForAdd.setVisible(false);
+            ftfId.setValue(productForEdit.getId());
+            textFieldName.setText(productForEdit.getName());
+            ftfPrice.setValue(productForEdit.getPrice());
+            ftfCount.setValue(productForEdit.getPrice());
+
+            if (productForEdit instanceof Food) {
+                lblInt.setText("Вес");
+                lblInt.setVisible(true);
+                ftfInt.setVisible(true);
+                ftfInt.setValue(((Food) productForEdit).getWeight());
+            }
+            else {
+                lblString.setVisible(true);
+                textFieldString.setVisible(true);
+
+                if (productForEdit instanceof Book) {
+                    lblString.setText("Жанр");
+                    textFieldString.setText(((Book) productForEdit).getGenre());
+                }
+                else if (productForEdit instanceof Clothes) {
+                    lblString.setText("Цвет");
+                    textFieldString.setText(((Clothes) productForEdit).getColor());
+                }
+            }
+        }
     }
 }

@@ -201,7 +201,7 @@ public class MainFrame extends JFrame implements ActionListener {
         // Render integer values on center
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-        table.setDefaultRenderer(Integer.class, centerRenderer);
+        table.setDefaultRenderer(String.class, centerRenderer);
 
         createPopupMenu();
         table.setComponentPopupMenu(popupMenu);
@@ -211,7 +211,7 @@ public class MainFrame extends JFrame implements ActionListener {
                 Point point = mouseEvent.getPoint();
                 int currentRow = table.rowAtPoint(point);
                 // get ID of chosen product
-                selectedId = (Integer) table.getValueAt(currentRow, 0);
+                selectedId = Integer.parseInt(table.getValueAt(currentRow, 0).toString());
             }
         });
         pack();
@@ -398,7 +398,7 @@ public class MainFrame extends JFrame implements ActionListener {
 
     // Edit menu
     private void add() {
-        DialogFrame dialog = new DialogFrame(numberFormatter, "Добавление товара");
+        DialogFrame dialog = new DialogFrame(numberFormatter, "Добавление товара", null);
         dialog.setVisible(true);
         AbstractProduct product = dialog.getProduct();
         if (product != null) {
@@ -436,7 +436,7 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     private void edit(int id, AbstractProduct productForEdit) {
-        DialogFrame dialog = new DialogFrame(numberFormatter, "Редактирование товара");
+        DialogFrame dialog = new DialogFrame(numberFormatter, "Редактирование товара", productForEdit);
         dialog.setVisible(true);
         AbstractProduct newProduct = dialog.getProduct();
         // if user didn't canceled dialog
