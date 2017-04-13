@@ -398,7 +398,7 @@ public class MainFrame extends JFrame implements ActionListener {
 
     // Edit menu
     private void add() {
-        DialogFrame dialog = new DialogFrame(numberFormatter, "Добавление товара", null);
+        DialogFrame dialog = new DialogFrame(numberFormatter, "Добавление товара");
         dialog.setVisible(true);
         AbstractProduct product = dialog.getProduct();
         if (product != null) {
@@ -436,7 +436,7 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     private void edit(int id, AbstractProduct productForEdit) {
-        DialogFrame dialog = new DialogFrame(numberFormatter, "Редактирование товара", productForEdit);
+        DialogFrame dialog = new DialogFrame(numberFormatter, "Редактирование товара");
         dialog.setVisible(true);
         AbstractProduct newProduct = dialog.getProduct();
         // if user didn't canceled dialog

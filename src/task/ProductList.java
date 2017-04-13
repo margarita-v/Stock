@@ -172,9 +172,8 @@ public class ProductList {
             // all lines in file were correct
             return true;
 
-        } catch (IOException | NumberFormatException | IndexOutOfBoundsException e) {
+        } catch (IOException | IllegalArgumentException | IndexOutOfBoundsException e) {
             // file is incorrect
-            e.printStackTrace();
             return false;
         }
     }

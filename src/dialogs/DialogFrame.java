@@ -11,7 +11,8 @@ import javax.swing.text.NumberFormatter;
 import java.awt.event.*;
 import java.util.Objects;
 
-public class DialogFrame extends JDialog {
+public class DialogFrame extends JDialog implements ActionListener {
+    //region Frame components
     // Default widgets
     private JPanel contentPane;
     private JButton buttonOK;
@@ -22,17 +23,24 @@ public class DialogFrame extends JDialog {
     private JTextField textFieldName;
     private JFormattedTextField ftfPrice;
     private JFormattedTextField ftfCount;
-    private JTextField textFieldString;
-    private JLabel lblString;
-    private JLabel lblInt;
-    private JFormattedTextField ftfInt;
+
+    private JRadioButton rbBook;
+    private JRadioButton rbClothes;
+    private JRadioButton rbFood;
+
+    private JTextField textFieldBook;
+    private JTextField textFieldClothes;
+    private JFormattedTextField ftfFood;
+
+    private JLabel lblBook;
+    private JLabel lblClothes;
+    private JLabel lblFood;
+    //endregion
 
     // AbstractProduct which this dialog returns as a result
     private AbstractProduct product;
 
-    private AbstractProduct productForEdit;
-
-    public DialogFrame(NumberFormatter numberFormatter, String title, AbstractProduct productForEdit) {
+    public DialogFrame(NumberFormatter numberFormatter, String title) {
         setContentPane(contentPane);
         setModal(true);
         setTitle(title);
@@ -42,36 +50,16 @@ public class DialogFrame extends JDialog {
         ftfId.setFormatterFactory(formatter);
         ftfPrice.setFormatterFactory(formatter);
         ftfCount.setFormatterFactory(formatter);
+        ftfFood.setFormatterFactory(formatter);
 
-        // Pre-filling product's fields if this dialog is using for edit
-        this.productForEdit = productForEdit;
-        if (productForEdit != null) {
-            ftfId.setValue(productForEdit.getId());
-            textFieldName.setText(productForEdit.getName());
-            ftfPrice.setValue(productForEdit.getPrice());
-            ftfCount.setValue(productForEdit.getQuantity());
-
-            if (productForEdit instanceof Food) {
-                lblInt.setText("Вес");
-                lblInt.setVisible(true);
-                ftfInt.setVisible(true);
-                ftfInt.setFormatterFactory(formatter);
-                ftfInt.setValue(((Food) productForEdit).getWeight());
-            }
-            else {
-                lblString.setVisible(true);
-                textFieldString.setVisible(true);
-
-                if (productForEdit instanceof Book) {
-                    lblString.setText("Жанр");
-                    textFieldString.setText(((Book) productForEdit).getGenre());
-                }
-                else {
-                    lblString.setText("Цвет");
-                    textFieldString.setText(((Clothes) productForEdit).getColor());
-                }
-            }
-        }
+        // Configure radio group
+        rbBook.addActionListener(this);
+        rbClothes.addActionListener(this);
+        rbFood.addActionListener(this);
+        ButtonGroup group = new ButtonGroup();
+        group.add(rbBook);
+        group.add(rbClothes);
+        group.add(rbFood);
 
         buttonOK.addActionListener(e -> onOK());
 
@@ -98,25 +86,28 @@ public class DialogFrame extends JDialog {
         String name = textFieldName.getText();
         Object countObj = ftfCount.getValue();
         Object priceObj = ftfPrice.getValue();
-        String stringField = textFieldString.getText();
-        Object intField = ftfInt.getValue();
+
+        String genre = textFieldBook.getText();
+        String color = textFieldClothes.getText();
+        Object weightObj = ftfFood.getValue();
 
         if (!Objects.equals(idObj, null) && !Objects.equals(name, "")
-                && !Objects.equals(countObj, null) && !Objects.equals(priceObj, null)) {
+                && !Objects.equals(countObj, null) && !Objects.equals(priceObj, null)
+                && (!Objects.equals(genre, "") || !Objects.equals(color, "")
+                || !Objects.equals(weightObj, null))) {
             try {
                 int id = (int) idObj;
                 int price = (int) priceObj;
                 int count = (int) countObj;
 
-                if (!Objects.equals(stringField, "")){
-                    if (productForEdit instanceof Book)
-                        product = new Book(id, name, price, count, stringField);
-                    else if (productForEdit instanceof Clothes)
-                        product = new Clothes(id, name, price, count, stringField);
+                if (rbBook.isSelected())
+                    product = new Book(id, name, price, count, genre);
+                else if (rbClothes.isSelected())
+                    product = new Clothes(id, name, price, count, color);
+                else {
+                    int weight = (int) weightObj;
+                    product = new Food(id, name, price, count, weight);
                 }
-                else if (intField != null && productForEdit instanceof Food)
-                    product = new Food(id, name, price, count, (int) intField);
-
                 dispose();
 
             } catch (NumberFormatException e) {
@@ -137,5 +128,21 @@ public class DialogFrame extends JDialog {
 
     public AbstractProduct getProduct() {
         return product;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent actionEvent) {
+        boolean bookChecked = rbBook.isSelected(),
+                clothesChecked = rbClothes.isSelected(),
+                foodChecked = rbFood.isSelected();
+
+        lblBook.setEnabled(bookChecked);
+        textFieldBook.setEnabled(bookChecked);
+
+        lblClothes.setEnabled(clothesChecked);
+        textFieldClothes.setEnabled(clothesChecked);
+
+        lblFood.setEnabled(foodChecked);
+        ftfFood.setEnabled(foodChecked);
     }
 }

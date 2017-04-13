@@ -48,11 +48,13 @@ class ProductTableModel implements TableModel {
     public Object getValueAt(int i, int i1) {
         AbstractProduct product = productList.getProductByIndex(i);
         String[] items = product.toString().split(" ");
-        if (i1 < columnNames.length - 3 || Objects.equals(columnNames[i1], "Жанр") && product instanceof Book ||
+        if (i1 < columnNames.length - 3)
+            return items[i1];
+        if (Objects.equals(columnNames[i1], "Жанр") && product instanceof Book ||
                 Objects.equals(columnNames[i1], "Цвет") && product instanceof Clothes ||
                 Objects.equals(columnNames[i1], "Вес") && product instanceof Food)
-            return items[i1];
-        return "";
+            return items[items.length - 1];
+        return "-";
     }
 
     @Override
