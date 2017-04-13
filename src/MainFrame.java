@@ -35,6 +35,7 @@ public class MainFrame extends JFrame implements ActionListener {
     // Table model for JTable based on main product list
     private ProductTableModel tableModel;
     private TableRowSorter<TableModel> sorter;
+    private Comparator<String> comparator;
 
     private NumberFormatter numberFormatter;
     private JFileChooser fileChooser;
@@ -198,7 +199,7 @@ public class MainFrame extends JFrame implements ActionListener {
         // Set sorter for table
         sorter = new TableRowSorter<>(table.getModel());
         // Set comparator for last column, where weight is an optional field
-        sorter.setComparator(6, new Comparator<String>() {
+        comparator = new Comparator<String>() {
             @Override
             public int compare(String value1, String value2) {
                 boolean firstNull = Objects.equals(value1, "-"),
@@ -214,7 +215,8 @@ public class MainFrame extends JFrame implements ActionListener {
                 int secondValue = Integer.parseInt(value2);
                 return firstValue < secondValue ? -1 : firstValue == secondValue ? 0 : 1;
             }
-        });
+        };
+        sorter.setComparator(6, comparator);
         table.setRowSorter(sorter);
 
         // Render integer values on center
@@ -366,13 +368,7 @@ public class MainFrame extends JFrame implements ActionListener {
                         filterResult = productList.filter(p -> p >= price);
                     else
                         filterResult = productList.filter(p -> p <= price);
-
-                    if (filterResult.size() > 0) {
-                        table.setModel(new ProductTableModel(filterResult));
-                        showMessage("Фильтр применен.");
-                    }
-                    else
-                        showMessage("Ни один товар не удовлетворяет заданному фильтру.");
+                    applyFilter();
 
                 } catch (NumberFormatException e) {
                     showErrorMessage("Введено неверное значение цены.");
@@ -398,20 +394,28 @@ public class MainFrame extends JFrame implements ActionListener {
             int minPrice = dialog.getMinPrice(), maxPrice = dialog.getMaxPrice();
             if (minPrice > 0 && maxPrice > 0) {
                 filterResult = productList.filter(price -> price >= minPrice && price <= maxPrice);
-                if (filterResult.size() > 0) {
-                    table.setModel(new ProductTableModel(filterResult));
-                    showMessage("Фильтр применен.");
-                }
-                else
-                    showMessage("Ни один товар не удовлетворяет заданному фильтру.");
+                applyFilter();
             }
         }
         else
             showMessage("Список товаров пуст.");
     }
 
+    private void applyFilter() {
+        if (filterResult.size() > 0) {
+            table.setModel(new ProductTableModel(filterResult));
+            TableRowSorter<TableModel> newSorter = new TableRowSorter<>(table.getModel());
+            newSorter.setComparator(6, comparator);
+            table.setRowSorter(newSorter);
+            showMessage("Фильтр применен.");
+        }
+        else
+            showMessage("Ни один товар не удовлетворяет заданному фильтру.");
+    }
+
     private void clearFilter() {
         table.setModel(tableModel);
+        table.setRowSorter(sorter);
     }
 
     // Edit menu
@@ -503,7 +507,7 @@ public class MainFrame extends JFrame implements ActionListener {
                 for (Integer id : chosenItems) {
                     productList.delete(id);
                 }
-                //table.setAutoCreateRowSorter(true);
+                sorter.sort();
                 table.updateUI();
                 showMessage("Выбранные товары были удалены.");
             }
