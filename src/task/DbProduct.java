@@ -9,23 +9,34 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DbProduct {
+// Class for working with database
+class DbProduct {
 
     private static final String DB_DRIVER = "org.h2.Driver";
-    private static final String DB_URL = "jdbc:h2:~/ProductsDb";
-    //private static final String DB_URL = "jdbc:postgresql://localhost/ProductsDb";
+    private static final String DB_URL = "jdbc:h2:" + System.getProperty("user.dir") + "/src/database/DbProducts";
 
-    private static final String DB_USER = "username";
-    private static final String DB_PASSWORD = "password";
+    //region Queries
+    private static final String insertProduct   = "INSERT INTO Product(id, product_name, price, quantity) VALUES(?,?,?,?)";
+    private static final String insertBook      = "INSERT INTO Books(book_id, genre) VALUES(?,?)";
+    private static final String insertClothes   = "INSERT INTO Clothes(clothes_id, color) VALUES(?,?)";
+    private static final String insertFood      = "INSERT INTO Food(food_id, weight) VALUES(?,?)";
+
+    private static final String deleteProduct   = "DELETE FROM Product WHERE id = ?";
+    private static final String clearTable      = "DELETE FROM Product";
+
+    private static final String getAllBooks     = "SELECT * FROM Product JOIN Books ON Product.id = Books.book_id";
+    private static final String getAllClothes   = "SELECT * FROM Product JOIN Clothes ON Product.id = Clothes.clothes_id";
+    private static final String getAllFood      = "SELECT * FROM Product JOIN Food ON Product.id = Food.food_id";
+    //endregion
 
     // Connect with database
     private static Connection getConnection() throws SQLException, ClassNotFoundException {
         Class.forName(DB_DRIVER);
-        return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+        return DriverManager.getConnection(DB_URL);
     }
 
     // Execute simple query without result set
-    private void executeQuery(String query) throws SQLException, ClassNotFoundException {
+    private static void executeQuery(String query) throws SQLException, ClassNotFoundException {
         Connection connection = getConnection();
 
         Statement statement = connection.createStatement();
@@ -35,33 +46,15 @@ public class DbProduct {
         connection.close();
     }
 
-    // Create table
-    /*
-    public void createDatabase() throws SQLException, ClassNotFoundException {
-        String SQL_CREATE_TABLE = "CREATE TABLE AbstractProduct("
-                + "id_product INTEGER NOT NULL, "
-                + "product_name VARCHAR(20) NOT NULL, "
-                + "price INTEGER NOT NULL, "
-                + "quantity INTEGER NOT NULL, "
-                + "description VARCHAR(256), "
-                + "PRIMARY KEY (id_product) "
-                + ")";
-        executeQuery(SQL_CREATE_TABLE);
-    }*/
-
     // Clear table
-    public void clearTable() throws SQLException, ClassNotFoundException {
-        String SQL_TRUNCATE_TABLE = "TRUNCATE TABLE Product";
-        executeQuery(SQL_TRUNCATE_TABLE);
+    static void clearTable() throws SQLException, ClassNotFoundException {
+        executeQuery(clearTable);
     }
 
     // Insert product to database
-    public void insert(AbstractProduct product) throws SQLException, ClassNotFoundException {
+    static void insert(AbstractProduct product) throws SQLException, ClassNotFoundException {
         Connection connection = getConnection();
-        String insertTableSQL = "INSERT INTO Product("
-                + "id, product_name, price, quantity) "
-                + "VALUES(?,?,?,?)";
-        PreparedStatement statement = connection.prepareStatement(insertTableSQL);
+        PreparedStatement statement = connection.prepareStatement(insertProduct);
 
         statement.setInt(1, product.getId());
         statement.setString(2, product.getName());
@@ -70,26 +63,17 @@ public class DbProduct {
         statement.executeUpdate();
 
         if (product instanceof Book) {
-            insertTableSQL = "INSERT INTO Books("
-                    + "id, genre) "
-                    + "VALUES(?,?)";
-            statement = connection.prepareStatement(insertTableSQL);
+            statement = connection.prepareStatement(insertBook);
             statement.setInt(1, product.getId());
             statement.setString(2, ((Book) product).getGenre());
         }
         else if (product instanceof Clothes) {
-            insertTableSQL = "INSERT INTO Clothes("
-                    + "id, color) "
-                    + "VALUES(?,?)";
-            statement = connection.prepareStatement(insertTableSQL);
+            statement = connection.prepareStatement(insertClothes);
             statement.setInt(1, product.getId());
             statement.setString(2, ((Clothes) product).getColor());
         }
         else if (product instanceof Food) {
-            insertTableSQL = "INSERT INTO Food("
-                    + "id, weight) "
-                    + "VALUES(?,?)";
-            statement = connection.prepareStatement(insertTableSQL);
+            statement = connection.prepareStatement(insertFood);
             statement.setInt(1, product.getId());
             statement.setInt(2, ((Food) product).getWeight());
         }
@@ -99,10 +83,9 @@ public class DbProduct {
     }
 
     // Delete product from database
-    public void delete(AbstractProduct product) throws SQLException, ClassNotFoundException {
+    static void delete(AbstractProduct product) throws SQLException, ClassNotFoundException {
         Connection connection = getConnection();
-        String deleteTableSQL = "DELETE FROM Product WHERE id = ?";
-        PreparedStatement statement = connection.prepareStatement(deleteTableSQL);
+        PreparedStatement statement = connection.prepareStatement(deleteProduct);
 
         statement.setInt(1, product.getId());
         statement.executeUpdate();
@@ -114,7 +97,7 @@ public class DbProduct {
     //region Get all products
 
     // Get all records in database
-    public List<AbstractProduct> getAll() throws SQLException, ClassNotFoundException {
+    static List<AbstractProduct> getAll() throws SQLException, ClassNotFoundException {
         List<AbstractProduct> products = new ArrayList<>();
         Connection connection = getConnection();
 
@@ -126,10 +109,9 @@ public class DbProduct {
         return products;
     }
 
-    private List<Book> getAllBooks(Connection connection) throws SQLException {
+    private static List<Book> getAllBooks(Connection connection) throws SQLException {
         List<Book> result = new ArrayList<>();
-        String selectSQL = "SELECT * FROM Product JOIN Books ON Product.id = Books.id";
-        PreparedStatement statement = connection.prepareStatement(selectSQL);
+        PreparedStatement statement = connection.prepareStatement(getAllBooks);
         ResultSet rs = statement.executeQuery();
         while (rs.next()) {
             int id = rs.getInt("id");
@@ -145,10 +127,9 @@ public class DbProduct {
         return result;
     }
 
-    private List<Clothes> getAllClothes(Connection connection) throws SQLException {
+    private static List<Clothes> getAllClothes(Connection connection) throws SQLException {
         List<Clothes> result = new ArrayList<>();
-        String selectSQL = "SELECT * FROM Product JOIN Clothes ON Product.id = Clothes.id";
-        PreparedStatement statement = connection.prepareStatement(selectSQL);
+        PreparedStatement statement = connection.prepareStatement(getAllClothes);
         ResultSet rs = statement.executeQuery();
         while (rs.next()) {
             int id = rs.getInt("id");
@@ -164,10 +145,9 @@ public class DbProduct {
         return result;
     }
 
-    private List<Food> getAllFood(Connection connection) throws SQLException {
+    private static List<Food> getAllFood(Connection connection) throws SQLException {
         List<Food> result = new ArrayList<>();
-        String selectSQL = "SELECT * FROM Product JOIN Food ON Product.id = Food.id";
-        PreparedStatement statement = connection.prepareStatement(selectSQL);
+        PreparedStatement statement = connection.prepareStatement(getAllFood);
         ResultSet rs = statement.executeQuery();
         while (rs.next()) {
             int id = rs.getInt("id");

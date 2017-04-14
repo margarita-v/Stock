@@ -219,10 +219,11 @@ public class MainFrame extends JFrame implements ActionListener {
         sorter.setComparator(6, comparator);
         table.setRowSorter(sorter);
 
-        // Render integer values on center
+        // Render values on center
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
         table.setDefaultRenderer(Integer.class, centerRenderer);
+        table.setDefaultRenderer(String.class, centerRenderer);
 
         createPopupMenu();
         table.setComponentPopupMenu(popupMenu);
@@ -334,17 +335,25 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     private void saveToTextFile() {
-        int res = fileChooser.showSaveDialog(null);
-        if (res == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            productList.saveToFile(file.getName());
-            showMessage("Данные были сохранены в текстовый файл.");
+        if (productList.size() > 0) {
+            int res = fileChooser.showSaveDialog(null);
+            if (res == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                productList.saveToFile(file.getName());
+                showMessage("Данные были сохранены в текстовый файл.");
+            }
         }
+        else
+            showMessage("Список товаров пуст.");
     }
 
     private void saveToDatabase() {
-        productList.saveToDatabase();
-        showMessage("Данные были сохранены в базу данных.");
+        if (productList.size() > 0) {
+            productList.saveToDatabase();
+            showMessage("Данные были сохранены в базу данных.");
+        }
+        else
+            showMessage("Список товаров пуст.");
     }
 
     private void exit() {
