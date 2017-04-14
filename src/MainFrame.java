@@ -24,6 +24,7 @@ public class MainFrame extends JFrame implements ActionListener {
     private JPanel rootPanel;
     private JTable table;
     private JPopupMenu popupMenu;
+    private JMenu editMenu;
 
     // Main product list
     private ProductList productList;
@@ -46,7 +47,7 @@ public class MainFrame extends JFrame implements ActionListener {
         // Main items of menu bar
         JMenu fileMenu = new JMenu("File");
         JMenu viewMenu = new JMenu("View");
-        JMenu editMenu = new JMenu("Edit");
+        editMenu = new JMenu("Edit");
 
         menuBar.add(fileMenu);
         menuBar.add(viewMenu);
@@ -148,7 +149,7 @@ public class MainFrame extends JFrame implements ActionListener {
     private void createGui() {
         setContentPane(rootPanel);
         setTitle("Информация о товарах");
-        setPreferredSize(new Dimension(600, 500));
+        setPreferredSize(new Dimension(700, 500));
 
         // Set font for all menu and menu items
         Font font = new Font("Arial", Font.PLAIN, 12);
@@ -319,6 +320,7 @@ public class MainFrame extends JFrame implements ActionListener {
         if (res == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
             if (productList.loadFromFile(file.getName())) {
+                clearFilter();
                 table.updateUI();
                 showMessage("Данные из файла были загружены.");
             }
@@ -329,6 +331,7 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private void openFromDatabase() {
         if (productList.loadFromDatabase()) {
+            clearFilter();
             table.updateUI();
             showMessage("Данные из базы данных были загружены");
         }
@@ -339,7 +342,11 @@ public class MainFrame extends JFrame implements ActionListener {
             int res = fileChooser.showSaveDialog(null);
             if (res == JFileChooser.APPROVE_OPTION) {
                 File file = fileChooser.getSelectedFile();
-                productList.saveToFile(file.getName());
+                String fileName = file.getName();
+                if (filterResult == null)
+                    productList.saveToFile(fileName);
+                else
+                    filterResult.saveToFile(fileName);
                 showMessage("Данные были сохранены в текстовый файл.");
             }
         }
@@ -349,7 +356,10 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private void saveToDatabase() {
         if (productList.size() > 0) {
-            productList.saveToDatabase();
+            if (filterResult == null)
+                productList.saveToDatabase();
+            else
+                filterResult.saveToDatabase();
             showMessage("Данные были сохранены в базу данных.");
         }
         else
@@ -373,11 +383,19 @@ public class MainFrame extends JFrame implements ActionListener {
             if (result != null) {
                 try {
                     int price = Integer.parseInt(result);
-                    if (priceMoreFilter)
-                        filterResult = productList.filter(p -> p >= price);
+                    if (price > 0) {
+                        if (priceMoreFilter)
+                            filterResult = filterResult != null ?
+                                    filterResult.filter(p -> p >= price) :
+                                    productList.filter(p -> p >= price);
+                        else
+                            filterResult = filterResult != null ?
+                                    filterResult.filter(p -> p <= price) :
+                                    productList.filter(p -> p <= price);
+                        applyFilter();
+                    }
                     else
-                        filterResult = productList.filter(p -> p <= price);
-                    applyFilter();
+                        throw new NumberFormatException();
 
                 } catch (NumberFormatException e) {
                     showErrorMessage("Введено неверное значение цены.");
@@ -402,7 +420,9 @@ public class MainFrame extends JFrame implements ActionListener {
             dialog.setVisible(true);
             int minPrice = dialog.getMinPrice(), maxPrice = dialog.getMaxPrice();
             if (minPrice > 0 && maxPrice > 0) {
-                filterResult = productList.filter(price -> price >= minPrice && price <= maxPrice);
+                filterResult = filterResult != null ?
+                        filterResult.filter(price -> price >= minPrice && price <= maxPrice) :
+                        productList.filter(price -> price >= minPrice && price <= maxPrice);
                 applyFilter();
             }
         }
@@ -416,6 +436,7 @@ public class MainFrame extends JFrame implements ActionListener {
             TableRowSorter<TableModel> newSorter = new TableRowSorter<>(table.getModel());
             newSorter.setComparator(6, comparator);
             table.setRowSorter(newSorter);
+            editMenu.setEnabled(false);
             showMessage("Фильтр применен.");
         }
         else
@@ -425,6 +446,8 @@ public class MainFrame extends JFrame implements ActionListener {
     private void clearFilter() {
         table.setModel(tableModel);
         table.setRowSorter(sorter);
+        filterResult = null;
+        editMenu.setEnabled(true);
     }
 
     // Edit menu
