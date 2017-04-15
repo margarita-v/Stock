@@ -12,7 +12,6 @@ import java.util.List;
 // Class for working with database
 class DbProduct {
 
-    private static final String DB_DRIVER = "org.h2.Driver";
     private static final String DB_URL = "jdbc:h2:" + System.getProperty("user.dir") + "/src/database/DbProducts";
 
     //region Queries
@@ -31,7 +30,6 @@ class DbProduct {
 
     // Connect with database
     private static Connection getConnection() throws SQLException, ClassNotFoundException {
-        Class.forName(DB_DRIVER);
         return DriverManager.getConnection(DB_URL);
     }
 

@@ -24,7 +24,6 @@ public class MainFrame extends JFrame implements ActionListener {
     private JPanel rootPanel;
     private JTable table;
     private JPopupMenu popupMenu;
-    private JMenu editMenu;
 
     // Main product list
     private ProductList productList;
@@ -35,6 +34,7 @@ public class MainFrame extends JFrame implements ActionListener {
 
     // Table model for JTable based on main product list
     private ProductTableModel tableModel;
+    private ProductTableModel oldTableModel;
     private TableRowSorter<TableModel> sorter;
     private Comparator<String> comparator;
 
@@ -47,7 +47,7 @@ public class MainFrame extends JFrame implements ActionListener {
         // Main items of menu bar
         JMenu fileMenu = new JMenu("File");
         JMenu viewMenu = new JMenu("View");
-        editMenu = new JMenu("Edit");
+        JMenu editMenu = new JMenu("Edit");
 
         menuBar.add(fileMenu);
         menuBar.add(viewMenu);
@@ -157,26 +157,12 @@ public class MainFrame extends JFrame implements ActionListener {
         UIManager.put("MenuItem.font", font);
 
         // Create numberFormatter for dialogs
-        NumberFormat integerFormat = NumberFormat.getIntegerInstance();
-        numberFormatter = new NumberFormatter(integerFormat) {
-            @Override
-            public Object stringToValue(String string) throws ParseException {
-                if (string == null || string.length() == 0)
-                    return null;
-                return super.stringToValue(string);
-            }
-        };
-        numberFormatter.setValueClass(Integer.class);
-        numberFormatter.setMinimum(1);
-        numberFormatter.setMaximum(Integer.MAX_VALUE);
-        numberFormatter.setAllowsInvalid(false);
+        createNumberFormatter();
 
         // Create file chooser for open and save text files
-        File workingDirectory = new File(System.getProperty("user.dir"));
-        fileChooser = new JFileChooser();
-        fileChooser.setCurrentDirectory(workingDirectory);
-        fileChooser.setFileFilter(new FileNameExtensionFilter("Text files", "txt"));
+        createFileChooser();
 
+        // Create main menu bar
         createMenuBar();
 
         // call exit() when cross is clicked
@@ -197,7 +183,67 @@ public class MainFrame extends JFrame implements ActionListener {
         table = new JTable(tableModel);
         getContentPane().add(new JScrollPane(table));
 
-        // Set sorter for table
+        // Create sorter for table
+        createSorter();
+
+        // Render values on center
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        table.setDefaultRenderer(Integer.class, centerRenderer);
+        table.setDefaultRenderer(String.class, centerRenderer);
+
+        createPopupMenu();
+        table.setComponentPopupMenu(popupMenu);
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e){
+                Point point = e.getPoint();
+                int currentRow = table.rowAtPoint(point);
+                // get ID of chosen product
+                selectedId = (Integer) table.getValueAt(currentRow, 0);
+                if (e.getClickCount() == 2)
+                    edit(selectedId, productList.getById(selectedId));
+            }
+        });
+
+        InputMap inputMap = table.getInputMap(JTable.WHEN_FOCUSED);
+        ActionMap actionMap = table.getActionMap();
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "DeleteRow");
+        actionMap.put("DeleteRow", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+        pack();
+        setVisible(true);
+    }
+
+    private void createNumberFormatter() {
+        NumberFormat integerFormat = NumberFormat.getIntegerInstance();
+        numberFormatter = new NumberFormatter(integerFormat) {
+            @Override
+            public Object stringToValue(String string) throws ParseException {
+                if (string == null || string.length() == 0)
+                    return null;
+                return super.stringToValue(string);
+            }
+        };
+        numberFormatter.setValueClass(Integer.class);
+        numberFormatter.setMinimum(1);
+        numberFormatter.setMaximum(Integer.MAX_VALUE);
+        numberFormatter.setAllowsInvalid(false);
+    }
+
+    private void createFileChooser() {
+        File workingDirectory = new File(System.getProperty("user.dir"));
+        fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(workingDirectory);
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Text files", "txt"));
+    }
+
+    private void createSorter() {
         sorter = new TableRowSorter<>(table.getModel());
         // Set comparator for last column, where weight is an optional field
         comparator = new Comparator<String>() {
@@ -219,26 +265,6 @@ public class MainFrame extends JFrame implements ActionListener {
         };
         sorter.setComparator(6, comparator);
         table.setRowSorter(sorter);
-
-        // Render values on center
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-        table.setDefaultRenderer(Integer.class, centerRenderer);
-        table.setDefaultRenderer(String.class, centerRenderer);
-
-        createPopupMenu();
-        table.setComponentPopupMenu(popupMenu);
-        table.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent mouseEvent) {
-                Point point = mouseEvent.getPoint();
-                int currentRow = table.rowAtPoint(point);
-                // get ID of chosen product
-                selectedId = (Integer) table.getValueAt(currentRow, 0);
-            }
-        });
-        pack();
-        setVisible(true);
     }
 
     private MainFrame() {
@@ -432,11 +458,12 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private void applyFilter() {
         if (filterResult.size() > 0) {
+            oldTableModel = tableModel;
             table.setModel(new ProductTableModel(filterResult));
-            TableRowSorter<TableModel> newSorter = new TableRowSorter<>(table.getModel());
+            tableModel = (ProductTableModel) table.getModel();
+            TableRowSorter<TableModel> newSorter = new TableRowSorter<>(tableModel);
             newSorter.setComparator(6, comparator);
             table.setRowSorter(newSorter);
-            editMenu.setEnabled(false);
             showMessage("Фильтр применен.");
         }
         else
@@ -444,10 +471,12 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     private void clearFilter() {
-        table.setModel(tableModel);
-        table.setRowSorter(sorter);
-        filterResult = null;
-        editMenu.setEnabled(true);
+        if (oldTableModel != null) {
+            table.setModel(oldTableModel);
+            table.setRowSorter(sorter);
+            filterResult = null;
+            oldTableModel = null;
+        }
     }
 
     // Edit menu
@@ -456,7 +485,7 @@ public class MainFrame extends JFrame implements ActionListener {
         dialog.setVisible(true);
         AbstractProduct product = dialog.getProduct();
         if (product != null) {
-            if (productList.add(product)) {
+            if (tableModel.add(product)) {
                 sorter.sort();
                 table.updateUI();
                 showMessage("Товар был добавлен");
@@ -495,7 +524,7 @@ public class MainFrame extends JFrame implements ActionListener {
         AbstractProduct newProduct = dialog.getProduct();
         // if user didn't canceled dialog
         if (newProduct != null) {
-            if (productList.edit(id, newProduct)) {
+            if (tableModel.edit(id, newProduct)) {
                 sorter.sort();
                 table.updateUI();
                 showMessage("Товар был отредактирован.");
@@ -514,7 +543,7 @@ public class MainFrame extends JFrame implements ActionListener {
             if (result != null) {
                 try {
                     int id = Integer.parseInt(result);
-                    if (!productList.delete(id))
+                    if (!tableModel.delete(id))
                         showErrorMessage("Товар с данным ID не найден.");
                     else {
                         sorter.sort();
@@ -537,7 +566,7 @@ public class MainFrame extends JFrame implements ActionListener {
             List<Integer> chosenItems = dialog.getChosenIDs();
             if (chosenItems.size() > 0) {
                 for (Integer id : chosenItems) {
-                    productList.delete(id);
+                    tableModel.delete(id);
                 }
                 sorter.sort();
                 table.updateUI();
@@ -553,7 +582,8 @@ public class MainFrame extends JFrame implements ActionListener {
             int dialogResult = JOptionPane.showConfirmDialog(this,
                     "Очистить список товаров?", "Подтверждение", JOptionPane.YES_NO_OPTION);
             if (dialogResult == JOptionPane.YES_OPTION) {
-                productList.clear();
+                tableModel.clear();
+                sorter.sort();
                 table.updateUI();
                 showMessage("Товары были удалены.");
             }

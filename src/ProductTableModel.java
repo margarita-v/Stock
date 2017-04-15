@@ -16,6 +16,22 @@ class ProductTableModel implements TableModel {
         this.productList = productList;
     }
 
+    boolean add(AbstractProduct product) {
+        return productList.add(product);
+    }
+
+    boolean edit(int id, AbstractProduct product) {
+        return productList.edit(id, product);
+    }
+
+    boolean delete(int id) {
+        return productList.delete(id);
+    }
+
+    void clear() {
+        productList.clear();
+    }
+
     @Override
     public int getRowCount() {
         return productList.size();
