@@ -10,11 +10,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Predicate;
 
 public class ProductList {
 
-    private List<AbstractProduct> products;
+    protected List<AbstractProduct> products;
 
     public ProductList() {
         products = new ArrayList<>();
@@ -24,20 +23,7 @@ public class ProductList {
         return products.size();
     }
 
-    public ProductList filter(Predicate<Integer> condition) {
-        ProductList result = new ProductList();
-        for (AbstractProduct product: products) {
-            if (condition.test(product.getPrice()))
-                result.add(product);
-        }
-        return result;
-    }
-
     //region Helpful functions
-    // Get product by index in product list; need for product table model
-    public AbstractProduct getProductByIndex(int index) {
-        return products.get(index);
-    }
 
     // Get ids of all products; need for delete a set of products
     public List<Integer> getProductsIDs() {

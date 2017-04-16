@@ -6,35 +6,24 @@ import task.ProductList;
 
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
+import java.util.function.Predicate;
 
-class ProductTableModel implements TableModel {
+class ProductTableModel extends ProductList implements TableModel {
 
-    private ProductList productList;
     private String[] columnNames = {"ID", "Название", "Цена", "Количество", "Жанр", "Цвет", "Вес"};
 
-    ProductTableModel(ProductList productList) {
-        this.productList = productList;
-    }
-
-    boolean add(AbstractProduct product) {
-        return productList.add(product);
-    }
-
-    boolean edit(int id, AbstractProduct product) {
-        return productList.edit(id, product);
-    }
-
-    boolean delete(int id) {
-        return productList.delete(id);
-    }
-
-    void clear() {
-        productList.clear();
+    ProductTableModel filter(Predicate<Integer> condition) {
+        ProductTableModel result = new ProductTableModel();
+        for (AbstractProduct product: products) {
+            if (condition.test(product.getPrice()))
+                result.add(product);
+        }
+        return result;
     }
 
     @Override
     public int getRowCount() {
-        return productList.size();
+        return size();
     }
 
     @Override
@@ -49,7 +38,7 @@ class ProductTableModel implements TableModel {
 
     @Override
     public Class<?> getColumnClass(int i) {
-        if (productList.size() == 0)
+        if (size() == 0)
             return Object.class;
         return getValueAt(0, i).getClass();
     }
@@ -61,7 +50,7 @@ class ProductTableModel implements TableModel {
 
     @Override
     public Object getValueAt(int i, int i1) {
-        AbstractProduct product = productList.getProductByIndex(i);
+        AbstractProduct product = products.get(i);
         switch(i1) {
             case 0: return product.getId();
             case 1: return product.getName();

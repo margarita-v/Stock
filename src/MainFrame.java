@@ -2,7 +2,6 @@ import dialogs.DeleteManyFrame;
 import dialogs.DialogFrame;
 import dialogs.PriceFilterFrame;
 import models.AbstractProduct;
-import task.ProductList;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -25,16 +24,13 @@ public class MainFrame extends JFrame implements ActionListener {
     private JTable table;
     private JPopupMenu popupMenu;
 
-    // Main product list
-    private ProductList productList;
-    // AbstractProduct list which will be created after filter apply
-    private ProductList filterResult;
     // ID of selected product in a table
     private int selectedId;
 
     // Table model for JTable based on main product list
     private ProductTableModel tableModel;
     private ProductTableModel oldTableModel;
+    private ProductTableModel filterResult;
     private TableRowSorter<TableModel> sorter;
     private Comparator<String> comparator;
 
@@ -178,8 +174,7 @@ public class MainFrame extends JFrame implements ActionListener {
                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        productList = new ProductList();
-        tableModel = new ProductTableModel(productList);
+        tableModel = new ProductTableModel();
         table = new JTable(tableModel);
         getContentPane().add(new JScrollPane(table));
 
@@ -202,7 +197,7 @@ public class MainFrame extends JFrame implements ActionListener {
                 // get ID of chosen product
                 selectedId = (Integer) table.getValueAt(currentRow, 0);
                 if (e.getClickCount() == 2)
-                    edit(selectedId, productList.getById(selectedId));
+                    edit(selectedId, tableModel.getById(selectedId));
             }
         });
 
@@ -244,7 +239,7 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     private void createSorter() {
-        sorter = new TableRowSorter<>(table.getModel());
+        sorter = new TableRowSorter<>(tableModel);
         // Set comparator for last column, where weight is an optional field
         comparator = new Comparator<String>() {
             @Override
@@ -326,10 +321,10 @@ public class MainFrame extends JFrame implements ActionListener {
                 break;
             // Popup menu
             case txtEditPopup:
-                edit(selectedId, productList.getById(selectedId));
+                edit(selectedId, tableModel.getById(selectedId));
                 break;
             case txtDeletePopup:
-                productList.delete(selectedId);
+                tableModel.delete(selectedId);
                 sorter.sort();
                 table.updateUI();
                 showMessage("Товар был удален");
@@ -345,7 +340,7 @@ public class MainFrame extends JFrame implements ActionListener {
         int res = fileChooser.showOpenDialog(null);
         if (res == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
-            if (productList.loadFromFile(file.getName())) {
+            if (tableModel.loadFromFile(file.getName())) {
                 clearFilter();
                 table.updateUI();
                 showMessage("Данные из файла были загружены.");
@@ -356,7 +351,7 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     private void openFromDatabase() {
-        if (productList.loadFromDatabase()) {
+        if (tableModel.loadFromDatabase()) {
             clearFilter();
             table.updateUI();
             showMessage("Данные из базы данных были загружены");
@@ -364,15 +359,11 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     private void saveToTextFile() {
-        if (productList.size() > 0) {
+        if (tableModel.size() > 0) {
             int res = fileChooser.showSaveDialog(null);
             if (res == JFileChooser.APPROVE_OPTION) {
                 File file = fileChooser.getSelectedFile();
-                String fileName = file.getName();
-                if (filterResult == null)
-                    productList.saveToFile(fileName);
-                else
-                    filterResult.saveToFile(fileName);
+                tableModel.saveToFile(file.getName());
                 showMessage("Данные были сохранены в текстовый файл.");
             }
         }
@@ -381,11 +372,8 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     private void saveToDatabase() {
-        if (productList.size() > 0) {
-            if (filterResult == null)
-                productList.saveToDatabase();
-            else
-                filterResult.saveToDatabase();
+        if (tableModel.size() > 0) {
+            tableModel.saveToDatabase();
             showMessage("Данные были сохранены в базу данных.");
         }
         else
@@ -396,14 +384,14 @@ public class MainFrame extends JFrame implements ActionListener {
         int dialogResult = JOptionPane.showConfirmDialog(this,
                 "Вы уверены, что хотите выйти?", "Подтверждение", JOptionPane.YES_NO_OPTION);
         if (dialogResult == JOptionPane.YES_OPTION) {
-            productList.clear();
+            tableModel.clear();
             System.exit(0);
         }
     }
 
     // View menu
     private void simpleFilter(String message, Boolean priceMoreFilter) {
-        if (productList.size() > 0) {
+        if (tableModel.size() > 0) {
             String result = JOptionPane.showInputDialog(this, message,
                     "Фильтр по цене", JOptionPane.DEFAULT_OPTION);
             if (result != null) {
@@ -411,13 +399,9 @@ public class MainFrame extends JFrame implements ActionListener {
                     int price = Integer.parseInt(result);
                     if (price > 0) {
                         if (priceMoreFilter)
-                            filterResult = filterResult != null ?
-                                    filterResult.filter(p -> p >= price) :
-                                    productList.filter(p -> p >= price);
+                            filterResult = tableModel.filter(p -> p >= price);
                         else
-                            filterResult = filterResult != null ?
-                                    filterResult.filter(p -> p <= price) :
-                                    productList.filter(p -> p <= price);
+                            filterResult = tableModel.filter(p -> p <= price);
                         applyFilter();
                     }
                     else
@@ -441,14 +425,12 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     private void priceRangeFilter() {
-        if (productList.size() > 0) {
+        if (tableModel.size() > 0) {
             PriceFilterFrame dialog = new PriceFilterFrame(numberFormatter, "Введите ценовой диапазон");
             dialog.setVisible(true);
             int minPrice = dialog.getMinPrice(), maxPrice = dialog.getMaxPrice();
             if (minPrice > 0 && maxPrice > 0) {
-                filterResult = filterResult != null ?
-                        filterResult.filter(price -> price >= minPrice && price <= maxPrice) :
-                        productList.filter(price -> price >= minPrice && price <= maxPrice);
+                filterResult = tableModel.filter(price -> price >= minPrice && price <= maxPrice);
                 applyFilter();
             }
         }
@@ -458,8 +440,9 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private void applyFilter() {
         if (filterResult.size() > 0) {
-            oldTableModel = tableModel;
-            table.setModel(new ProductTableModel(filterResult));
+            if (oldTableModel == null)
+                oldTableModel = tableModel;
+            table.setModel(filterResult);
             tableModel = (ProductTableModel) table.getModel();
             TableRowSorter<TableModel> newSorter = new TableRowSorter<>(tableModel);
             newSorter.setComparator(6, comparator);
@@ -474,7 +457,7 @@ public class MainFrame extends JFrame implements ActionListener {
         if (oldTableModel != null) {
             table.setModel(oldTableModel);
             table.setRowSorter(sorter);
-            filterResult = null;
+            tableModel = (ProductTableModel) table.getModel();
             oldTableModel = null;
         }
     }
@@ -496,14 +479,14 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     private void edit() {
-        if (productList.size() > 0) {
+        if (tableModel.size() > 0) {
             String result = JOptionPane.showInputDialog(this,
                     "Введите ID товара, который требуется отредактировать.",
                     "Редактирование", JOptionPane.DEFAULT_OPTION);
             if (result != null) {
                 try {
                     int id = Integer.parseInt(result);
-                    AbstractProduct productForEdit = productList.getById(id);
+                    AbstractProduct productForEdit = tableModel.getById(id);
                     if (productForEdit == null)
                         showErrorMessage("Товар с данным ID не найден.");
                     else
@@ -536,7 +519,7 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     private void delete() {
-        if (productList.size() > 0) {
+        if (tableModel.size() > 0) {
             String result = JOptionPane.showInputDialog(this,
                     "Введите ID товара, который требуется удалить.",
                     "Удаление", JOptionPane.DEFAULT_OPTION);
@@ -560,8 +543,8 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     private void deleteMany() {
-        if (productList.size() > 0) {
-            DeleteManyFrame dialog = new DeleteManyFrame(productList.getProductsIDs());
+        if (tableModel.size() > 0) {
+            DeleteManyFrame dialog = new DeleteManyFrame(tableModel.getProductsIDs());
             dialog.setVisible(true);
             List<Integer> chosenItems = dialog.getChosenIDs();
             if (chosenItems.size() > 0) {
@@ -578,7 +561,7 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     private void clear() {
-        if (productList.size() > 0) {
+        if (tableModel.size() > 0) {
             int dialogResult = JOptionPane.showConfirmDialog(this,
                     "Очистить список товаров?", "Подтверждение", JOptionPane.YES_NO_OPTION);
             if (dialogResult == JOptionPane.YES_OPTION) {
