@@ -8,10 +8,12 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import java.util.function.Predicate;
 
+// This class is a layer between product list and JTable
 class ProductTableModel extends ProductList implements TableModel {
 
     private String[] columnNames = {"ID", "Название", "Цена", "Количество", "Жанр", "Цвет", "Вес"};
 
+    // Price filter for product list
     ProductTableModel filter(Predicate<Integer> condition) {
         ProductTableModel result = new ProductTableModel();
         for (AbstractProduct product: products) {
