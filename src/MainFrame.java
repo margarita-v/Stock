@@ -32,8 +32,6 @@ public class MainFrame extends JFrame implements ActionListener {
 
     // Sorter for JTable
     private TableRowSorter<TableModel> sorter;
-    // Comparator for weight column which is optional for different products
-    private Comparator<String> comparator;
 
     private NumberFormatter numberFormatter;
     private JFileChooser fileChooser;
@@ -82,6 +80,7 @@ public class MainFrame extends JFrame implements ActionListener {
 
         // Configure view menu
         JMenu filterMenu = new JMenu("Filter");
+        JMenuItem resetSortItem = new JMenuItem(txtResetSort);
         // Items of filter menu
         JMenuItem moreFilterItem = new JMenuItem(txtPriceMoreFilter);
         JMenuItem lessFilterItem = new JMenuItem(txtPriceLessFilter);
@@ -92,6 +91,7 @@ public class MainFrame extends JFrame implements ActionListener {
         lessFilterItem.addActionListener(this);
         rangeFilterItem.addActionListener(this);
         clearFilterItem.addActionListener(this);
+        resetSortItem.addActionListener(this);
         // Set shortcuts
         setShortcut(moreFilterItem, 'M');
         setShortcut(lessFilterItem, 'L');
@@ -103,6 +103,7 @@ public class MainFrame extends JFrame implements ActionListener {
         filterMenu.addSeparator();
         filterMenu.add(clearFilterItem);
         viewMenu.add(filterMenu);
+        viewMenu.add(resetSortItem);
 
         // Configure edit menu
         JMenuItem addItem = new JMenuItem(txtAdd);
@@ -211,7 +212,7 @@ public class MainFrame extends JFrame implements ActionListener {
     private void createSorter() {
         sorter = new TableRowSorter<>(tableModel);
         // Set comparator for last column, where weight is an optional field
-        comparator = new Comparator<String>() {
+        Comparator<String> comparator = new Comparator<String>() {
             @Override
             public int compare(String value1, String value2) {
                 boolean firstNull = Objects.equals(value1, "-"),
@@ -302,6 +303,9 @@ public class MainFrame extends JFrame implements ActionListener {
                 break;
             case txtClearFilter:
                 clearFilter();
+                break;
+            case txtResetSort:
+                resetSort();
                 break;
             // Edit menu
             case txtAdd:
@@ -437,10 +441,8 @@ public class MainFrame extends JFrame implements ActionListener {
             // set new model
             table.setModel(filterResult);
             tableModel = (ProductTableModel) table.getModel();
-            // create new sorter for new model
-            TableRowSorter<TableModel> newSorter = new TableRowSorter<>(tableModel);
-            newSorter.setComparator(6, comparator);
-            table.setRowSorter(newSorter);
+            // new sorter for new model
+            sorter.setModel(tableModel);
             showMessage("Фильтр применен.");
         }
         else
@@ -452,10 +454,14 @@ public class MainFrame extends JFrame implements ActionListener {
         if (oldTableModel != null) {
             // set first table model
             table.setModel(oldTableModel);
-            table.setRowSorter(sorter);
+            sorter.setModel(oldTableModel);
             tableModel = (ProductTableModel) table.getModel();
             oldTableModel = null;
         }
+    }
+
+    private void resetSort() {
+        sorter.setSortKeys(null);
     }
 
     // Edit menu
@@ -563,6 +569,7 @@ public class MainFrame extends JFrame implements ActionListener {
     // Actions after loading data from text file or database
     private void loadInfo(String message) {
         clearFilter();
+        resetSort();
         table.updateUI();
         showMessage(message);
     }
@@ -590,21 +597,22 @@ public class MainFrame extends JFrame implements ActionListener {
     //endregion
 
     //region Menu item's names
-    private static final String txtOpenTextFile = "From text file";
+    private static final String txtOpenTextFile     = "From text file";
     private static final String txtOpenFromDatabase = "From database";
-    private static final String txtSaveToTextFile = "To text file";
-    private static final String txtSaveToDatabase = "To database";
-    private static final String txtExit = "Exit";
+    private static final String txtSaveToTextFile   = "To text file";
+    private static final String txtSaveToDatabase   = "To database";
+    private static final String txtExit             = "Exit";
 
-    private static final String txtPriceMoreFilter = "Price more than value";
-    private static final String txtPriceLessFilter = "Price less than value";
+    private static final String txtPriceMoreFilter  = "Price more than value";
+    private static final String txtPriceLessFilter  = "Price less than value";
     private static final String txtPriceRangeFilter = "Set price range";
-    private static final String txtClearFilter = "ClearFilter";
+    private static final String txtClearFilter      = "ClearFilter";
+    private static final String txtResetSort        = "Reset sort";
 
-    private static final String txtAdd = "Add";
-    private static final String txtEdit = "Edit";
-    private static final String txtDelete = "Delete";
-    private static final String txtDeleteMany = "Delete many";
-    private static final String txtClear = "Clear";
+    private static final String txtAdd          = "Add";
+    private static final String txtEdit         = "Edit";
+    private static final String txtDelete       = "Delete";
+    private static final String txtDeleteMany   = "Delete many";
+    private static final String txtClear        = "Clear";
     //endregion
 }
