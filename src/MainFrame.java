@@ -22,10 +22,6 @@ public class MainFrame extends JFrame implements ActionListener {
     // Default components
     private JPanel rootPanel;
     private JTable table;
-    private JPopupMenu popupMenu;
-
-    // ID of selected product in a table
-    private int selectedId;
 
     // Current table model
     private ProductTableModel tableModel;
@@ -136,17 +132,6 @@ public class MainFrame extends JFrame implements ActionListener {
         setJMenuBar(menuBar);
     }
 
-    private void createPopupMenu() {
-        popupMenu = new JPopupMenu();
-        JMenuItem popupEditItem = new JMenuItem(txtEditPopup);
-        JMenuItem popupDeleteItem = new JMenuItem(txtDeletePopup);
-        popupEditItem.addActionListener(this);
-        popupDeleteItem.addActionListener(this);
-
-        popupMenu.add(popupEditItem);
-        popupMenu.add(popupDeleteItem);
-    }
-
     private void createGui() {
         setContentPane(rootPanel);
         setTitle("Информация о товарах");
@@ -159,10 +144,8 @@ public class MainFrame extends JFrame implements ActionListener {
 
         // Create numberFormatter for dialogs
         createNumberFormatter();
-
         // Create file chooser for open and save text files
         createFileChooser();
-
         // Create main menu bar
         createMenuBar();
 
@@ -179,6 +162,7 @@ public class MainFrame extends JFrame implements ActionListener {
                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
                 JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
+        // Create table and table model
         tableModel = new ProductTableModel();
         table = new JTable(tableModel);
         getContentPane().add(new JScrollPane(table));
@@ -192,30 +176,11 @@ public class MainFrame extends JFrame implements ActionListener {
         table.setDefaultRenderer(Integer.class, centerRenderer);
         table.setDefaultRenderer(String.class, centerRenderer);
 
-        createPopupMenu();
-        table.setComponentPopupMenu(popupMenu);
-        table.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e){
-                Point point = e.getPoint();
-                int currentRow = table.rowAtPoint(point);
-                // get ID of chosen product
-                selectedId = (Integer) table.getValueAt(currentRow, 0);
-                if (e.getClickCount() == 2)
-                    edit(selectedId, tableModel.getById(selectedId));
-            }
-        });
+        // Edit product on double click
+        editAction();
+        // Delete product on delete pressed
+        deleteAction();
 
-        InputMap inputMap = table.getInputMap(JTable.WHEN_FOCUSED);
-        ActionMap actionMap = table.getActionMap();
-
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "DeleteRow");
-        actionMap.put("DeleteRow", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-            }
-        });
         pack();
         setVisible(true);
     }
@@ -265,6 +230,36 @@ public class MainFrame extends JFrame implements ActionListener {
         };
         sorter.setComparator(6, comparator);
         table.setRowSorter(sorter);
+    }
+
+    private void editAction() {
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e){
+                if (e.getClickCount() == 2) {
+                    Point point = e.getPoint();
+                    int currentRow = table.rowAtPoint(point);
+                    // get ID of chosen product
+                    int selectedId = (Integer) table.getValueAt(currentRow, 0);
+                    edit(selectedId, tableModel.getById(selectedId));
+                }
+            }
+        });
+    }
+
+    private void deleteAction() {
+        InputMap inputMap = table.getInputMap(JTable.WHEN_FOCUSED);
+        ActionMap actionMap = table.getActionMap();
+
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "DeleteRow");
+        actionMap.put("DeleteRow", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selectedId = (Integer) table.getValueAt(table.getSelectedRow(), 0);
+                tableModel.delete(selectedId);
+                updateTable("Товар был удален.");
+            }
+        });
     }
 
     private MainFrame() {
@@ -323,16 +318,6 @@ public class MainFrame extends JFrame implements ActionListener {
                 break;
             case txtClear:
                 clear();
-                break;
-            // Popup menu
-            case txtEditPopup:
-                edit(selectedId, tableModel.getById(selectedId));
-                break;
-            case txtDeletePopup:
-                tableModel.delete(selectedId);
-                sorter.sort();
-                table.updateUI();
-                showMessage("Товар был удален");
                 break;
             default:
                 break;
@@ -515,11 +500,9 @@ public class MainFrame extends JFrame implements ActionListener {
         AbstractProduct newProduct = dialog.getProduct();
         // if user didn't canceled dialog
         if (newProduct != null) {
-            if (tableModel.edit(id, newProduct)) {
+            if (tableModel.edit(id, newProduct))
                 updateTable("Товар был отредактирован.");
-                // ID of selected product was changed
-                selectedId = newProduct.getId();
-            } else
+            else
                 showErrorMessage("Товар с данным ID уже существует.");
         }
     }
@@ -623,8 +606,5 @@ public class MainFrame extends JFrame implements ActionListener {
     private static final String txtDelete = "Delete";
     private static final String txtDeleteMany = "Delete many";
     private static final String txtClear = "Clear";
-
-    private static final String txtEditPopup = "Edit product";
-    private static final String txtDeletePopup = "Delete product";
     //endregion
 }
