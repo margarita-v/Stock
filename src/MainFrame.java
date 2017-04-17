@@ -362,8 +362,15 @@ public class MainFrame extends JFrame implements ActionListener {
             int res = fileChooser.showSaveDialog(null);
             if (res == JFileChooser.APPROVE_OPTION) {
                 File file = fileChooser.getSelectedFile();
-                tableModel.saveToFile(file.getName());
-                showMessage("Данные были сохранены в текстовый файл.");
+                // Check file extension
+                String filename = file.getName();
+                int i = filename.lastIndexOf('.');
+                if (i > 0 && Objects.equals(filename.substring(i + 1), "txt")) {
+                    tableModel.saveToFile(filename);
+                    showMessage("Данные были сохранены в текстовый файл.");
+                }
+                else
+                    showErrorMessage("Расширение файла должно быть .txt");
             }
         }
         else
