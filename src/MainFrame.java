@@ -14,6 +14,7 @@ import java.awt.event.*;
 import java.io.File;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -256,9 +257,18 @@ public class MainFrame extends JFrame implements ActionListener {
         actionMap.put("DeleteRow", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int selectedId = (Integer) table.getValueAt(table.getSelectedRow(), 0);
-                tableModel.delete(selectedId);
-                updateTable("Товар был удален.");
+                int dialogResult = JOptionPane.showConfirmDialog(rootPanel,
+                        "Удалить выбранные товары?", "Подтверждение", JOptionPane.YES_NO_OPTION);
+                if (dialogResult == JOptionPane.YES_OPTION) {
+                    // List of ids of chosen products
+                    List<Integer> ids = new ArrayList<>();
+                    for (int i : table.getSelectedRows())
+                        ids.add((Integer) table.getValueAt(i, 0));
+                    for (int id : ids)
+                        tableModel.delete(id);
+                    table.clearSelection();
+                    updateTable("Товары были удалены.");
+                }
             }
         });
     }
