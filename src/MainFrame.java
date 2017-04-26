@@ -22,6 +22,7 @@ import java.util.Objects;
 public class MainFrame extends JFrame implements ActionListener {
     // Default components
     private JPanel rootPanel;
+    private JLabel lblFilter;
     private JTable table;
 
     // Current table model
@@ -407,6 +408,11 @@ public class MainFrame extends JFrame implements ActionListener {
                                 tableModel.filter(p -> p >= price) :
                                 tableModel.filter(p -> p <= price);
                         applyFilter();
+                        String filterMessage = "Применен фильтр: ";
+                        filterMessage += priceMoreFilter ?
+                                "цена больше " + price :
+                                "цена меньше " + price;
+                        lblFilter.setText(filterMessage);
                     }
                     else
                         throw new NumberFormatException();
@@ -436,6 +442,7 @@ public class MainFrame extends JFrame implements ActionListener {
             if (minPrice > 0 && maxPrice > 0) {
                 filterResult = tableModel.filter(price -> price >= minPrice && price <= maxPrice);
                 applyFilter();
+                lblFilter.setText("Применен фильтр: цена от " + minPrice + " до " + maxPrice);
             }
         }
         else
@@ -453,6 +460,7 @@ public class MainFrame extends JFrame implements ActionListener {
             tableModel = (ProductTableModel) table.getModel();
             // new sorter for new model
             sorter.setModel(tableModel);
+            lblFilter.setVisible(true);
             showMessage("Фильтр применен.");
         }
         else
@@ -467,6 +475,8 @@ public class MainFrame extends JFrame implements ActionListener {
             sorter.setModel(oldTableModel);
             tableModel = (ProductTableModel) table.getModel();
             oldTableModel = null;
+            lblFilter.setVisible(false);
+            lblFilter.setText("");
         }
     }
 

@@ -6,6 +6,15 @@
     </constraints>
     <properties/>
     <border type="none"/>
-    <children/>
+    <children>
+      <component id="d0c64" class="javax.swing.JLabel" binding="lblFilter">
+        <constraints border-constraint="North"/>
+        <properties>
+          <horizontalAlignment value="0"/>
+          <text value=""/>
+          <visible value="false"/>
+        </properties>
+      </component>
+    </children>
   </grid>
 </form>
