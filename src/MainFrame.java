@@ -2,6 +2,8 @@ import dialogs.DeleteManyFrame;
 import dialogs.DialogFrame;
 import dialogs.PriceFilterFrame;
 import models.AbstractProduct;
+import task.DbUtils;
+import task.FileUtils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -12,6 +14,8 @@ import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -345,16 +349,24 @@ public class MainFrame extends JFrame implements ActionListener {
         int res = fileChooser.showOpenDialog(null);
         if (res == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
-            if (tableModel.loadFromFile(file.getName()))
+            try {
+                tableModel.setProducts(FileUtils.loadFromFile(file.getName()));
                 loadInfo("Данные из файла были загружены.");
-            else
+            } catch (IOException e) {
                 showErrorMessage("Файл содержит неверные данные.");
+                e.printStackTrace();
+            }
         }
     }
 
     private void openFromDatabase() {
-        if (tableModel.loadFromDatabase())
+        try {
+            tableModel.setProducts(DbUtils.loadFromDatabase());
             loadInfo("Данные из базы данных были загружены.");
+        } catch (SQLException | ClassNotFoundException e) {
+            showErrorMessage("Ошибка загрузки из базы данных.");
+            e.printStackTrace();
+        }
     }
 
     private void saveToTextFile() {
@@ -366,8 +378,13 @@ public class MainFrame extends JFrame implements ActionListener {
                 String filename = file.getName();
                 int i = filename.lastIndexOf('.');
                 if (i > 0 && Objects.equals(filename.substring(i + 1), "txt")) {
-                    tableModel.saveToFile(filename);
-                    showMessage("Данные были сохранены в текстовый файл.");
+                    try {
+                        FileUtils.saveToFile(filename, tableModel);
+                        showMessage("Данные были сохранены в текстовый файл.");
+                    } catch (IOException e) {
+                        showErrorMessage("Ошибка загрузки данных в файл.");
+                        e.printStackTrace();
+                    }
                 }
                 else
                     showErrorMessage("Расширение файла должно быть .txt");
@@ -379,8 +396,13 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private void saveToDatabase() {
         if (tableModel.size() > 0) {
-            tableModel.saveToDatabase();
-            showMessage("Данные были сохранены в базу данных.");
+            try {
+                DbUtils.saveToDatabase(tableModel);
+                showMessage("Данные были сохранены в базу данных.");
+            } catch (SQLException | ClassNotFoundException e) {
+                showErrorMessage("Ошибка загрузки в базу данных.");
+                e.printStackTrace();
+            }
         }
         else
             showMessage("Список товаров пуст.");

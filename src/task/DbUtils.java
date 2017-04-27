@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 // Class for working with database
-class DbUtils {
+public class DbUtils {
 
     private static final String DB_URL = "jdbc:h2:" + System.getProperty("user.dir") + "/src/database/DbProducts";
 
@@ -19,8 +19,6 @@ class DbUtils {
     private static final String insertBook      = "INSERT INTO Books(book_id, genre) VALUES(?,?)";
     private static final String insertClothes   = "INSERT INTO Clothes(clothes_id, color) VALUES(?,?)";
     private static final String insertFood      = "INSERT INTO Food(food_id, weight) VALUES(?,?)";
-
-    private static final String deleteProduct   = "DELETE FROM Product WHERE id = ?";
     private static final String clearTable      = "DELETE FROM Product";
 
     private static final String getAllBooks     = "SELECT * FROM Product JOIN Books ON Product.id = Books.book_id";
@@ -45,12 +43,12 @@ class DbUtils {
     }
 
     // Clear table
-    static void clearTable() throws SQLException, ClassNotFoundException {
+    private static void clearTable() throws SQLException, ClassNotFoundException {
         executeQuery(clearTable);
     }
 
     // Insert product to database
-    static void insert(AbstractProduct product) throws SQLException, ClassNotFoundException {
+    private static void insert(AbstractProduct product) throws SQLException, ClassNotFoundException {
         Connection connection = getConnection();
         PreparedStatement statement = connection.prepareStatement(insertProduct);
 
@@ -80,22 +78,10 @@ class DbUtils {
         connection.close();
     }
 
-    // Delete product from database
-    static void delete(AbstractProduct product) throws SQLException, ClassNotFoundException {
-        Connection connection = getConnection();
-        PreparedStatement statement = connection.prepareStatement(deleteProduct);
-
-        statement.setInt(1, product.getId());
-        statement.executeUpdate();
-
-        statement.close();
-        connection.close();
-    }
-
     //region Get all products
 
     // Get all records in database
-    static List<AbstractProduct> getAll() throws SQLException, ClassNotFoundException {
+    private static List<AbstractProduct> getAll() throws SQLException, ClassNotFoundException {
         List<AbstractProduct> products = new ArrayList<>();
         Connection connection = getConnection();
 
@@ -161,4 +147,18 @@ class DbUtils {
         return result;
     }
     //endregion
+
+    public static ProductList loadFromDatabase() throws SQLException, ClassNotFoundException {
+        ProductList products = new ProductList();
+        getAll().forEach(products::add);
+        return products;
+    }
+
+    // Save info to database
+    public static void saveToDatabase(ProductList products) throws SQLException, ClassNotFoundException {
+        clearTable();
+        for (AbstractProduct p: products) {
+            insert(p);
+        }
+    }
 }

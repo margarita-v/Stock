@@ -36,6 +36,6 @@ public abstract class AbstractProduct {
 
     @Override
     public String toString() {
-        return id + " " + name + " " + price + " " + quantity;
+        return id + "," + name + "," + price + "," + quantity;
     }
 }

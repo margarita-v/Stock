@@ -13,6 +13,13 @@ class ProductTableModel extends ProductList implements TableModel {
 
     private String[] columnNames = {"ID", "Название", "Цена", "Количество", "Жанр", "Цвет", "Вес"};
 
+    void setProducts(ProductList products) {
+        this.products.clear();
+        for (AbstractProduct product: products) {
+            this.products.add(product);
+        }
+    }
+
     // Price filter for product list
     ProductTableModel filter(Predicate<Integer> condition) {
         ProductTableModel result = new ProductTableModel();

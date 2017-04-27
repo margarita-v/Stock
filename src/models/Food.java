@@ -15,6 +15,6 @@ public class Food extends AbstractProduct {
 
     @Override
     public String toString() {
-        return super.toString() + " " + weight;
+        return super.toString() + "," + weight;
     }
 }
