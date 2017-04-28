@@ -31,10 +31,6 @@ public class MainFrame extends JFrame implements ActionListener {
 
     // Current table model
     private ProductTableModel tableModel;
-    // Previous table model (need for clear filter)
-    private ProductTableModel oldTableModel;
-    // Table model which is a filter result
-    private ProductTableModel filterResult;
 
     // Sorter for JTable
     private TableRowSorter<TableModel> sorter;
@@ -248,7 +244,7 @@ public class MainFrame extends JFrame implements ActionListener {
                     int currentRow = table.rowAtPoint(point);
                     // get ID of chosen product
                     int selectedId = (Integer) table.getValueAt(currentRow, 0);
-                    edit(selectedId, tableModel.getById(selectedId));
+                    edit(selectedId, tableModel.getProductById(selectedId));
                 }
             }
         });
@@ -426,10 +422,10 @@ public class MainFrame extends JFrame implements ActionListener {
                 try {
                     int price = Integer.parseInt(result);
                     if (price > 0) {
-                        filterResult = priceMoreFilter ?
-                                tableModel.filter(p -> p >= price) :
-                                tableModel.filter(p -> p <= price);
-                        applyFilter();
+                        boolean filterResult = priceMoreFilter ?
+                            tableModel.filter(p -> p >= price):
+                            tableModel.filter(p -> p <= price);
+                        applyFilter(filterResult);
                         String filterMessage = "Применен фильтр: ";
                         filterMessage += priceMoreFilter ?
                                 "цена больше " + price :
@@ -462,8 +458,8 @@ public class MainFrame extends JFrame implements ActionListener {
             dialog.setVisible(true);
             int minPrice = dialog.getMinPrice(), maxPrice = dialog.getMaxPrice();
             if (minPrice > 0 && maxPrice > 0) {
-                filterResult = tableModel.filter(price -> price >= minPrice && price <= maxPrice);
-                applyFilter();
+                boolean filterResult = tableModel.filter(price -> price >= minPrice && price <= maxPrice);
+                applyFilter(filterResult);
                 lblFilter.setText("Применен фильтр: цена от " + minPrice + " до " + maxPrice);
             }
         }
@@ -471,14 +467,8 @@ public class MainFrame extends JFrame implements ActionListener {
             showMessage("Список товаров пуст.");
     }
 
-    private void applyFilter() {
-        // if a filter result is not empty
-        if (filterResult.size() > 0) {
-            // save first table model, not every filter result
-            if (oldTableModel == null)
-                oldTableModel = tableModel;
-            // set new model
-            table.setModel(filterResult);
+    private void applyFilter(boolean filterResult) {
+        if (filterResult) {
             tableModel = (ProductTableModel) table.getModel();
             // new sorter for new model
             sorter.setModel(tableModel);
@@ -490,16 +480,9 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     private void clearFilter() {
-        // if a filter was applied
-        if (oldTableModel != null) {
-            // set first table model
-            table.setModel(oldTableModel);
-            sorter.setModel(oldTableModel);
-            tableModel = (ProductTableModel) table.getModel();
-            oldTableModel = null;
-            lblFilter.setVisible(false);
-            lblFilter.setText("");
-        }
+        tableModel.clearFilter();
+        lblFilter.setVisible(false);
+        lblFilter.setText("");
     }
 
     private void resetSort() {
@@ -527,7 +510,7 @@ public class MainFrame extends JFrame implements ActionListener {
             if (result != null) {
                 try {
                     int id = Integer.parseInt(result);
-                    AbstractProduct productForEdit = tableModel.getById(id);
+                    AbstractProduct productForEdit = tableModel.getProductById(id);
                     if (productForEdit == null)
                         showErrorMessage("Товар с данным ID не найден.");
                     else

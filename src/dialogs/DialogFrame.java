@@ -169,7 +169,7 @@ public class DialogFrame extends JDialog implements ActionListener {
             ftfId.setValue(productForEdit.getId());
             textFieldName.setText(productForEdit.getName());
             ftfPrice.setValue(productForEdit.getPrice());
-            ftfCount.setValue(productForEdit.getPrice());
+            ftfCount.setValue(productForEdit.getQuantity());
 
             if (productForEdit instanceof Food) {
                 lblInt.setText("Вес");

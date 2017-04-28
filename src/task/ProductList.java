@@ -9,11 +9,11 @@ public class ProductList implements Iterable<AbstractProduct> {
     protected List<AbstractProduct> products;
 
     protected ProductList() {
-        products = new ArrayList<>();
+        this.products = new ArrayList<>();
     }
 
     public int size() {
-        return products.size();
+        return this.products.size();
     }
 
     //region Helpful functions
@@ -21,15 +21,15 @@ public class ProductList implements Iterable<AbstractProduct> {
     // Get ids of all products; need for delete a set of products
     public List<Integer> getProductsIDs() {
         List<Integer> result = new ArrayList<>();
-        for (AbstractProduct product: products) {
+        for (AbstractProduct product: this.products) {
             result.add(product.getId());
         }
         return result;
     }
 
     // Find product by id
-    private boolean find(int id) {
-        for (AbstractProduct product: products) {
+    protected boolean find(int id) {
+        for (AbstractProduct product: this.products) {
             if (product.getId() == id)
                 return true;
         }
@@ -37,16 +37,16 @@ public class ProductList implements Iterable<AbstractProduct> {
     }
 
     // Get product's index by id
-    private int getIndex(int id) {
+    protected int getIndex(int id) {
         AbstractProduct product = getById(id);
         if (product != null)
-            return products.indexOf(product);
+            return this.products.indexOf(product);
         return -1;
     }
 
     // Get product by id
-    public AbstractProduct getById(int id) {
-        for (AbstractProduct product: products) {
+    protected AbstractProduct getById(int id) {
+        for (AbstractProduct product: this.products) {
             if (product.getId() == id)
                 return product;
         }
@@ -58,7 +58,7 @@ public class ProductList implements Iterable<AbstractProduct> {
     // Add product to the list of products
     public boolean add(AbstractProduct product) {
         if (!find(product.getId())) {
-            products.add(product);
+            this.products.add(product);
             return true;
         }
         return false;
@@ -68,7 +68,7 @@ public class ProductList implements Iterable<AbstractProduct> {
     public boolean delete(int id) {
         AbstractProduct product = getById(id);
         if (product != null) {
-            products.remove(product);
+            this.products.remove(product);
             return true;
         }
         return false;
@@ -82,8 +82,8 @@ public class ProductList implements Iterable<AbstractProduct> {
                 // get index of product which we should edit,
                 // remove it and insert new product to the same position
                 int index = getIndex(id);
-                products.remove(index);
-                products.add(index, newProduct);
+                this.products.remove(index);
+                this.products.add(index, newProduct);
                 return true;
             }
             else {
@@ -92,8 +92,8 @@ public class ProductList implements Iterable<AbstractProduct> {
                     // get index of product which we should edit,
                     // remove it and insert new product to the same position
                     int index = getIndex(id);
-                    products.remove(index);
-                    products.add(index, newProduct);
+                    this.products.remove(index);
+                    this.products.add(index, newProduct);
                     return true;
                 }
                 else
@@ -108,7 +108,7 @@ public class ProductList implements Iterable<AbstractProduct> {
 
     // Clear product list
     public void clear() {
-        products.clear();
+        this.products.clear();
     }
     //endregion
 
