@@ -25,6 +25,16 @@ class ProductTableModel extends ProductList implements TableModel {
         }
     }
 
+    AbstractProduct getProductById(int id) {
+        if (this.productsBeforeFilter == null)
+            return getById(id);
+        for (AbstractProduct product: this.productsBeforeFilter) {
+            if (product.getId() == id)
+                return product;
+        }
+        return null;
+    }
+
     private boolean foundInProductsBeforeFilter(int id) {
         if (this.productsBeforeFilter == null)
             return false;
@@ -33,16 +43,6 @@ class ProductTableModel extends ProductList implements TableModel {
                 return true;
         }
         return false;
-    }
-
-    public AbstractProduct getProductById(int id) {
-        if (this.productsBeforeFilter == null)
-            return getById(id);
-        for (AbstractProduct product: this.productsBeforeFilter) {
-            if (product.getId() == id)
-                return product;
-        }
-        return null;
     }
 
     @Override
@@ -67,21 +67,32 @@ class ProductTableModel extends ProductList implements TableModel {
     }
 
     @Override
+    public boolean delete(int id) {
+        boolean del = super.delete(id);
+        if (this.productsBeforeFilter == null)
+            return del;
+        AbstractProduct product = getProductById(id);
+        if (product != null) {
+            this.productsBeforeFilter.remove(product);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public boolean edit(int id, AbstractProduct newProduct) {
         if (this.productsBeforeFilter == null)
             return super.edit(id, newProduct);
-        boolean foundInFilter = find(id);
         if (foundInProductsBeforeFilter(id)) {
             // ID wasn't changed, but other fields were changed
             if (id == newProduct.getId()) {
-                editHelp(foundInFilter, id, newProduct);
+                editHelp(id, newProduct);
                 return true;
             }
             else {
                 // ID and other info were changed
-                boolean foundNewProductInFilter = find(newProduct.getId());
                 if (!foundInProductsBeforeFilter(newProduct.getId())) {
-                    editHelp(foundNewProductInFilter, id, newProduct);
+                    editHelp(id, newProduct);
                     return true;
                 }
                 else
@@ -92,6 +103,16 @@ class ProductTableModel extends ProductList implements TableModel {
         else
             // product with this ID not found
             return false;
+    }
+
+    private void editHelp(int id, AbstractProduct newProduct) {
+        int index = getIndex(id);
+        this.productsBeforeFilter.remove(index);
+        index = super.getIndex(id);
+        if (index > -1)
+            this.products.remove(index);
+        // Check the filter condition
+        testCondition(newProduct);
     }
 
     // Price filter for product list
@@ -124,17 +145,6 @@ class ProductTableModel extends ProductList implements TableModel {
             this.products.addAll(this.productsBeforeFilter);
             this.productsBeforeFilter = null;
         }
-    }
-
-    private void editHelp(boolean foundInFilter, int id, AbstractProduct newProduct) {
-        int index = getIndex(id);
-        this.productsBeforeFilter.remove(index);
-        if (foundInFilter) {
-            index = super.getIndex(id);
-            this.products.remove(index);
-        }
-        // Check the filter condition
-        testCondition(newProduct);
     }
 
     private void testCondition(AbstractProduct product) {
